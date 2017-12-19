@@ -3,6 +3,7 @@ package org.cytoscape.legend;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.geom.Point2D;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import org.cytoscape.view.presentation.annotations.ShapeAnnotation;
 import org.cytoscape.view.presentation.annotations.TextAnnotation;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.values.LineType;
+import org.cytoscape.view.vizmap.VisualMappingFunction;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualPropertyDependency;
 import org.cytoscape.view.vizmap.VisualStyle;
@@ -108,11 +110,19 @@ public class LegendController {
 		// Now we cruise thru the list of node, then edge attributes looking for mappings.  Each mapping may potentially be a legend entry.
 		VisualMappingManager manager = (VisualMappingManager) registrar.getService( VisualMappingManager.class);
 		VisualStyle style = manager.getCurrentVisualStyle();
-		System.out.println("style: " + style.getTitle());
+		System.out.println("\n\nstyle: " + style.getTitle());
 		Set<VisualPropertyDependency<?>> depends = style.getAllVisualPropertyDependencies();
 		for (VisualPropertyDependency<?> depend : depends)
 		{
 			System.out.println("Dependency: " + depend.getDisplayName());
+		}
+		Collection<VisualMappingFunction<?, ?>> vizmapFns = style.getAllVisualMappingFunctions();
+		for (VisualMappingFunction<?,?> fn : vizmapFns)
+		{
+			String type = fn.getMappingColumnType().toString();
+			int idx = type.lastIndexOf('.');
+			if (idx > 0) type = type.substring(idx+1);
+			System.out.println(fn.toString() + " function: " + fn.getMappingColumnName() + ": " + type);
 		}
 		
 	}
@@ -126,7 +136,7 @@ public class LegendController {
 		int WIDTH = 160;
 		int MARGIN = 10;
 		int TEXT_OFFSET_X = 80;
-		int TEXT_OFFSET_Y = 20;
+		int TEXT_OFFSET_Y = 5;
 		int COL1WIDTH = 60;
 		int BOX_HEIGHT = (NLINES * LINE_HEIGHT) + (2 * MARGIN);
 
@@ -173,7 +183,7 @@ public class LegendController {
 			Object[] textArgs = { "x", TEXT_OFFSET_X, "y", TEXT_OFFSET_Y + yy, "width", WIDTH - COL1WIDTH, "height", LINE_HEIGHT, "text", names[i]};
 			strs = ezMap(textArgs);
 			TextAnnotation textBox = textFactory.createAnnotation(TextAnnotation.class, networkView, strs);
-			textBox.moveAnnotation(new Point2D.Double(COL1WIDTH + 2 * MARGIN,yy+20));
+			textBox.moveAnnotation(new Point2D.Double(COL1WIDTH + 2 * MARGIN,yy+TEXT_OFFSET_Y));
 			
 			if (BUILD_GROUP) 		group.addMember(textBox);
 			else 					mgr.addAnnotation(textBox);
