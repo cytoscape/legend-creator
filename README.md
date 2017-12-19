@@ -6,4 +6,4 @@ As a part of building the legend, it traverses the structure of the current netw
 
 Then it uses that information to create annotations that are inserted onto the Cytoscape canvas.
 
-This example shows how to add a tab to the the control panel, how to add a menu item that brings that tab to the foreground, and how to create annotations based on the state of the current network.
+This example shows how to add a tab to the control panel, how to add a menu item that brings that tab to the foreground, and how to create annotations based on the state of the current network.
