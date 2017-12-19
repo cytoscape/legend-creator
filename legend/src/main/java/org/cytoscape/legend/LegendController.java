@@ -16,6 +16,7 @@ import org.cytoscape.model.CyNode;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
+import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.annotations.AnnotationFactory;
 import org.cytoscape.view.presentation.annotations.AnnotationManager;
 import org.cytoscape.view.presentation.annotations.GroupAnnotation;
@@ -91,7 +92,7 @@ public class LegendController {
 			 Paint borderColor = nodeView.getVisualProperty(BasicVisualLexicon.NODE_BORDER_PAINT);
 			 borderColorMap.put(borderColor, node);
 		}
-		System.out.println("There are " + fillColorMap.size() + " fill colors and " + borderColorMap.size() + " border colors used.");
+		System.out.println("\n\nThere are " + fillColorMap.size() + " fill colors and " + borderColorMap.size() + " border colors used.");
 			
 		Map<Paint, CyEdge> edgeColorMap = new HashMap<Paint, CyEdge>();
 		Map<LineType, CyEdge> lineTypeMap = new HashMap<LineType, CyEdge>();
@@ -110,7 +111,7 @@ public class LegendController {
 		// Now we cruise thru the list of node, then edge attributes looking for mappings.  Each mapping may potentially be a legend entry.
 		VisualMappingManager manager = (VisualMappingManager) registrar.getService( VisualMappingManager.class);
 		VisualStyle style = manager.getCurrentVisualStyle();
-		System.out.println("\n\nstyle: " + style.getTitle());
+		System.out.println("style: " + style.getTitle());
 		Set<VisualPropertyDependency<?>> depends = style.getAllVisualPropertyDependencies();
 		for (VisualPropertyDependency<?> depend : depends)
 		{
@@ -122,7 +123,9 @@ public class LegendController {
 			String type = fn.getMappingColumnType().toString();
 			int idx = type.lastIndexOf('.');
 			if (idx > 0) type = type.substring(idx+1);
-			System.out.println(fn.toString() + " function: " + fn.getMappingColumnName() + ": " + type);
+			VisualProperty<?> prop = fn.getVisualProperty();
+			String dispName = prop.getDisplayName();
+			System.out.println(fn.toString() + " function: " + fn.getMappingColumnName() + ": " + type + " to " + dispName);
 		}
 		
 	}
@@ -130,6 +133,7 @@ public class LegendController {
 	private void buildAnnotation() {
 		
 		// Construct the annotations to add to the diagram
+		 boolean BUILD_GROUP = true;
 
 		int LINE_HEIGHT = 30;
 		int NLINES = 8;
@@ -140,31 +144,17 @@ public class LegendController {
 		int COL1WIDTH = 60;
 		int BOX_HEIGHT = (NLINES * LINE_HEIGHT) + (2 * MARGIN);
 
+		String[] groupArgs = { "x", "0", "y", "0", 
+						"width", "" + WIDTH, 
+						"height", "" + BOX_HEIGHT};
+		GroupAnnotation group = groupFactory.createAnnotation(GroupAnnotation.class, networkView, ezMap(groupArgs));
+
 		Object[] args = { "x", 0, "y", 0, "width", WIDTH, "height", BOX_HEIGHT ,  "shapeType" , "Rectangle"};
 		Map<String,String> strs = ezMap(args);
 		ShapeAnnotation boundingBox = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, strs);
-		System.out.println("Annotation: "  + boundingBox);
-//		boundingBox.setFillColor(Color.RED);
-		
-		if (boundingBox != null)
-		{
-//			boundingBox.setCanvas(Annotation.BACKGROUND);
-			boundingBox.moveAnnotation(new Point2D.Double(0,0));
-		}
-		GroupAnnotation group = null;
-			
-		boolean BUILD_GROUP = false;
-
-		if (BUILD_GROUP)
-		{
-			String[] groupArgs = { "x", "0", "y", "0", 
-						"width", "" + WIDTH, 
-						"height", "" + BOX_HEIGHT};
-			group = groupFactory.createAnnotation(GroupAnnotation.class, networkView, ezMap(groupArgs));
-			group.addMember(boundingBox);
-		}
-		else
-			mgr.addAnnotation(boundingBox);
+		boundingBox.moveAnnotation(new Point2D.Double(0,0));
+		mgr.addAnnotation(boundingBox);
+		if (BUILD_GROUP) group.addMember(boundingBox);
 		
 		Color[] colors = { Color.BLACK, Color.BLUE, Color.RED, Color.GREEN, Color.CYAN, Color.GRAY, Color.MAGENTA, Color.YELLOW };
 		String[] names= { "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf", "Hotel" };
@@ -175,21 +165,20 @@ public class LegendController {
 			strs = ezMap(swatchArgs);
 			ShapeAnnotation lineBox = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, strs);
 			lineBox.setFillColor(colors[i]);
-			lineBox.moveAnnotation(new Point2D.Double(MARGIN,yy));
 			
-			if (BUILD_GROUP) 		group.addMember(lineBox);
-			else 					mgr.addAnnotation(lineBox);
+			lineBox.moveAnnotation(new Point2D.Double(MARGIN,yy));
+			mgr.addAnnotation(lineBox);
+			if (BUILD_GROUP) 			group.addMember(lineBox);
 
 			Object[] textArgs = { "x", TEXT_OFFSET_X, "y", TEXT_OFFSET_Y + yy, "width", WIDTH - COL1WIDTH, "height", LINE_HEIGHT, "text", names[i]};
 			strs = ezMap(textArgs);
 			TextAnnotation textBox = textFactory.createAnnotation(TextAnnotation.class, networkView, strs);
 			textBox.moveAnnotation(new Point2D.Double(COL1WIDTH + 2 * MARGIN,yy+TEXT_OFFSET_Y));
-			
-			if (BUILD_GROUP) 		group.addMember(textBox);
-			else 					mgr.addAnnotation(textBox);
+			mgr.addAnnotation(textBox);
+			if (BUILD_GROUP) 			group.addMember(textBox);
 			
 		}
-		if (BUILD_GROUP)				mgr.addAnnotation(group);
+		if (BUILD_GROUP) 			mgr.addAnnotation(group);
 	}
 //------------------------------------------------------------------
 	
