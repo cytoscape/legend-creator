@@ -1,6 +1,7 @@
 package org.cytoscape.legend;
 
 import java.awt.Color;
+import java.awt.LinearGradientPaint;
 import java.awt.Paint;
 import java.awt.geom.Point2D;
 import java.util.Collection;
@@ -28,6 +29,9 @@ import org.cytoscape.view.vizmap.VisualMappingFunction;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualPropertyDependency;
 import org.cytoscape.view.vizmap.VisualStyle;
+import org.cytoscape.view.vizmap.mappings.BoundaryRangeValues;
+import org.cytoscape.view.vizmap.mappings.ContinuousMapping;
+import org.cytoscape.view.vizmap.mappings.ContinuousMappingPoint;
 
 public class LegendController {
 
@@ -125,60 +129,112 @@ public class LegendController {
 			if (idx > 0) type = type.substring(idx+1);
 			VisualProperty<?> prop = fn.getVisualProperty();
 			String dispName = prop.getDisplayName();
-			System.out.println(fn.toString() + " function: " + fn.getMappingColumnName() + ": " + type + " to " + dispName);
+			String mapType = fn.toString();
+			if (mapType.contains("Passthrough")) continue;
+			System.out.println("The attribute " + fn.getMappingColumnName() + " (" + 
+					type + ") is shown with " + dispName + " with a " + mapType + " function");
+			if (mapType.contains("Continuous"))
+			{
+				ContinuousMapping<?, ?> continFn = (ContinuousMapping<?, ?>) fn;
+				Object pts = continFn.getAllPoints();
+				List<ContinuousMappingPoint<?, ?>> list = (List<ContinuousMappingPoint<?, ?>>) pts;
+				for (ContinuousMappingPoint<?, ?> pt : list)
+				{
+					BoundaryRangeValues<?> vals = pt.getRange();
+					Object min = vals.lesserValue;
+					Object max = vals.greaterValue;
+					Object v = vals.equalValue;
+					if (v instanceof Color)
+					{
+						System.out.println("Color attribute: "  + dispName);
+					}
+					if (v instanceof Double || v instanceof Integer)
+					{
+						System.out.println("Numeric attribute: "  + dispName);
+					}
+					System.out.println("Range " + min + "  - " + max); 					
+					
+					
+				}
+			}
 		}
 		
 	}
 	//------------------------------------------------------------------
 	private void buildAnnotation() {
 		
-		// Construct the annotations to add to the diagram
-		 boolean BUILD_GROUP = true;
-
-		int LINE_HEIGHT = 30;
-		int NLINES = 8;
-		int WIDTH = 160;
-		int MARGIN = 10;
-		int TEXT_OFFSET_X = 80;
-		int TEXT_OFFSET_Y = 5;
-		int COL1WIDTH = 60;
-		int BOX_HEIGHT = (NLINES * LINE_HEIGHT) + (2 * MARGIN);
-
-		String[] groupArgs = { "x", "0", "y", "0", 
-						"width", "" + WIDTH, 
-						"height", "" + BOX_HEIGHT};
-		GroupAnnotation group = groupFactory.createAnnotation(GroupAnnotation.class, networkView, ezMap(groupArgs));
-
-		Object[] args = { "x", 0, "y", 0, "width", WIDTH, "height", BOX_HEIGHT ,  "shapeType" , "Rectangle"};
-		Map<String,String> strs = ezMap(args);
-		ShapeAnnotation boundingBox = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, strs);
-		boundingBox.moveAnnotation(new Point2D.Double(0,0));
-		mgr.addAnnotation(boundingBox);
-		if (BUILD_GROUP) group.addMember(boundingBox);
+//		// Construct the annotations to add to the diagram
+//		 boolean BUILD_GROUP = true;
+//
+//		int LINE_HEIGHT = 30;
+//		int NLINES = 8;
+//		int WIDTH = 160;
+//		int MARGIN = 10;
+//		int TEXT_OFFSET_X = 80;
+//		int TEXT_OFFSET_Y = 5;
+//		int COL1WIDTH = 60;
+//		int BOX_HEIGHT = (NLINES * LINE_HEIGHT) + (2 * MARGIN);
+//
+//		String[] groupArgs = { "x", "0", "y", "0", 
+//						"width", "" + WIDTH, 
+//						"height", "" + BOX_HEIGHT};
+//		GroupAnnotation group = groupFactory.createAnnotation(GroupAnnotation.class, networkView, ezMap(groupArgs));
+////		if (BUILD_GROUP) mgr.addAnnotation(group);
+//
+//		Object[] args = { "x", 0, "y", 0, "width", WIDTH, "height", BOX_HEIGHT ,  "shapeType" , "Rectangle"};
+//		Map<String,String> strs = ezMap(args);
+//		ShapeAnnotation boundingBox = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, strs);
+//		mgr.addAnnotation(boundingBox);
+//		boundingBox.setCanvas("background");
+//		if (BUILD_GROUP) group.addMember(boundingBox);
+//		boundingBox.moveAnnotation(new Point2D.Double(0,0));
+//		
+//		Color[] colors = { Color.BLACK, Color.BLUE, Color.RED, Color.GREEN, Color.CYAN, Color.GRAY, Color.MAGENTA, Color.YELLOW };
+//		String[] names= { "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf", "Hotel" };
+//		for (int i=0; i < NLINES; i++)
+//		{
+//			int yy = (i * LINE_HEIGHT) + 10;
+//			Object[] swatchArgs = { "x", MARGIN, "y", MARGIN + yy , "width", COL1WIDTH, "height", (LINE_HEIGHT - MARGIN),  "shapeType" , "Rectangle"};
+//			strs = ezMap(swatchArgs);
+//			ShapeAnnotation lineBox = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, strs);
+//			lineBox.setFillColor(colors[i]);
+//			lineBox.setCanvas("background");
+//			mgr.addAnnotation(lineBox);
+//			if (BUILD_GROUP) 			group.addMember(lineBox);
+//			lineBox.moveAnnotation(new Point2D.Double(MARGIN,yy));
+//
+//			Object[] textArgs = { "x", TEXT_OFFSET_X, "y", TEXT_OFFSET_Y + yy, "width", WIDTH - COL1WIDTH, "height", LINE_HEIGHT, "text", names[i]};
+//			strs = ezMap(textArgs);
+//			TextAnnotation textBox = textFactory.createAnnotation(TextAnnotation.class, networkView, strs);
+//			textBox.setCanvas("background");
+//			mgr.addAnnotation(textBox);
+//			if (BUILD_GROUP) 			group.addMember(textBox);
+//			textBox.moveAnnotation(new Point2D.Double(COL1WIDTH + 2 * MARGIN,yy+TEXT_OFFSET_Y));
+//		}
+//		if (BUILD_GROUP) 
+//		{
+//			group.setCanvas("background");
+//			mgr.addAnnotation(group);
+//			group.moveAnnotation(new Point2D.Double(1000,1000));
+//		}
+		Map<String,String> gradientArgs = new HashMap<String,String>();
+		gradientArgs.put("x", "200");
+		gradientArgs.put("y", "0");
+		gradientArgs.put("width", "200");
+		gradientArgs.put("height", "500");
+		gradientArgs.put("shapeType", "Rectangle");
+		ShapeAnnotation gradientBox = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, gradientArgs);
+		gradientBox.moveAnnotation(new Point2D.Double(200,0));
+		mgr.addAnnotation(gradientBox);
 		
-		Color[] colors = { Color.BLACK, Color.BLUE, Color.RED, Color.GREEN, Color.CYAN, Color.GRAY, Color.MAGENTA, Color.YELLOW };
-		String[] names= { "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf", "Hotel" };
-		for (int i=0; i < NLINES; i++)
-		{
-			int yy = (i * LINE_HEIGHT) + 10;
-			Object[] swatchArgs = { "x", MARGIN, "y", MARGIN + yy , "width", COL1WIDTH, "height", (LINE_HEIGHT - MARGIN),  "shapeType" , "Rectangle"};
-			strs = ezMap(swatchArgs);
-			ShapeAnnotation lineBox = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, strs);
-			lineBox.setFillColor(colors[i]);
-			
-			lineBox.moveAnnotation(new Point2D.Double(MARGIN,yy));
-			mgr.addAnnotation(lineBox);
-			if (BUILD_GROUP) 			group.addMember(lineBox);
-
-			Object[] textArgs = { "x", TEXT_OFFSET_X, "y", TEXT_OFFSET_Y + yy, "width", WIDTH - COL1WIDTH, "height", LINE_HEIGHT, "text", names[i]};
-			strs = ezMap(textArgs);
-			TextAnnotation textBox = textFactory.createAnnotation(TextAnnotation.class, networkView, strs);
-			textBox.moveAnnotation(new Point2D.Double(COL1WIDTH + 2 * MARGIN,yy+TEXT_OFFSET_Y));
-			mgr.addAnnotation(textBox);
-			if (BUILD_GROUP) 			group.addMember(textBox);
-			
-		}
-		if (BUILD_GROUP) 			mgr.addAnnotation(group);
+		Point2D start = new Point2D.Float(0, 0);
+		Point2D end = new Point2D.Float(0, 250);
+		float[] stops = {0.0f, 0.5f, 1.0f};
+		Color[] colors = {Color.RED, Color.WHITE, Color.BLUE};
+		LinearGradientPaint p = new LinearGradientPaint(start, end, stops, colors);		
+		gradientBox.setFillColor(p);
+		Map<String, String>  gradArgs = gradientBox.getArgMap();
+		System.out.println(gradientBox + "\nArgs: \n" + gradArgs); 					
 	}
 //------------------------------------------------------------------
 	
