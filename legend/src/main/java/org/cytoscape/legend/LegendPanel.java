@@ -72,16 +72,6 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 		
 		JLabel titlePrompt = new JLabel("Title");
 		title = new JTextField();
-<<<<<<< HEAD
-		title.setMaximumSize(new Dimension(400, 28));
-		title.setPreferredSize(new Dimension(300, 28));
-		title.setMinimumSize(new Dimension(200, 28));
-		JLabel subtitlePrompt = new JLabel("Subtitle");
-//		showDate = new JCheckBox("Include Date");
-		subtitle = new JTextField();
-		subtitle.setMaximumSize(new Dimension(400, 28));
-		subtitle.setPreferredSize(new Dimension(300, 28));
-=======
 		title.setMaximumSize(new Dimension(300, 28));
 		title.setPreferredSize(new Dimension(200, 28));
 		title.setMinimumSize(new Dimension(200, 28));
@@ -90,7 +80,6 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 		subtitle = new JTextField();
 		subtitle.setMaximumSize(new Dimension(300, 28));
 		subtitle.setPreferredSize(new Dimension(200, 28));
->>>>>>> 5e04d5cf23e1c74418c64cd3e7fc8f71ad9f8c96
 		subtitle.setMinimumSize(new Dimension(200, 28));
 		ActionListener echo = new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) { System.out.println(e.getActionCommand()); }
@@ -125,9 +114,7 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 		};
 		adder.addActionListener(layout);
 		add(line(adder));
-		
-		
-<<<<<<< HEAD
+
 		JButton selectAll = new JButton("Select All Annotations");
 		ActionListener selAll = new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) { controller.selectAllAnnotations();  }
@@ -143,9 +130,6 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 		clearAll.addActionListener(clr);
 		add(line(clearAll));
 
-		
-=======
->>>>>>> 5e04d5cf23e1c74418c64cd3e7fc8f71ad9f8c96
 		JButton tester = new JButton("Test");
 		ActionListener test = new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) { controller.testAnnotations();  }
