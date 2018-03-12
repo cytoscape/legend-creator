@@ -24,6 +24,7 @@ public class CyActivator extends AbstractCyActivator {
 		
 		LegendController controller = new LegendController(reg);
 		LegendPanel legendPanel = new LegendPanel(reg, controller);
+		controller.setLegendPanel(legendPanel);
 		LegendAction legendAction = new LegendAction(cytoscapeDesktopService,legendPanel);
 		
 		registerService(bc,legendPanel,CytoPanelComponent.class);
