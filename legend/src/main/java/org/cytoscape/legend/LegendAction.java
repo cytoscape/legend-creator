@@ -42,3 +42,4 @@ public class LegendAction extends AbstractCyAction {
 	}
 
 }
+
