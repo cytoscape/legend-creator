@@ -13,7 +13,7 @@
 	<groupId>org.cytoscape</groupId>
 	<artifactId>legend-creator</artifactId>
 	<packaging>bundle</packaging>
-	<version>1.0</version>
+	<version>1.1.1</version>
 	
 	<name>Legend Creator</name>
 
@@ -102,7 +102,7 @@
 			<version>${osgi.api.version}</version>
 		</dependency>
 
-		<dependency>
+<!-- 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.2</version>
@@ -120,7 +120,7 @@
 			<version>1.5.2</version>
 			<scope>test</scope>
 		</dependency>
-<!-- 		<dependency>
+		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>service-api</artifactId>
 			<version>${cytoscape.api.version}</version>

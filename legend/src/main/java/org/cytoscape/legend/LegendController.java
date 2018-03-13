@@ -2,14 +2,7 @@ package org.cytoscape.legend;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.LinearGradientPaint;
 import java.awt.Paint;
-import java.awt.font.FontRenderContext;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,11 +21,7 @@ import org.cytoscape.view.model.DiscreteRange;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.annotations.Annotation;
-import org.cytoscape.view.presentation.annotations.AnnotationFactory;
 import org.cytoscape.view.presentation.annotations.AnnotationManager;
-import org.cytoscape.view.presentation.annotations.ArrowAnnotation;
-import org.cytoscape.view.presentation.annotations.ArrowAnnotation.AnchorType;
-import org.cytoscape.view.presentation.annotations.ArrowAnnotation.ArrowEnd;
 import org.cytoscape.view.presentation.annotations.GroupAnnotation;
 import org.cytoscape.view.presentation.annotations.ShapeAnnotation;
 import org.cytoscape.view.presentation.annotations.ShapeAnnotation.ShapeType;
@@ -43,9 +32,7 @@ import org.cytoscape.view.presentation.property.values.NodeShape;
 import org.cytoscape.view.vizmap.VisualMappingFunction;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
-import org.cytoscape.view.vizmap.mappings.BoundaryRangeValues;
 import org.cytoscape.view.vizmap.mappings.ContinuousMapping;
-import org.cytoscape.view.vizmap.mappings.ContinuousMappingPoint;
 import org.cytoscape.view.vizmap.mappings.DiscreteMapping;
 
 /*
@@ -169,7 +156,7 @@ public class LegendController {
 		if (title.length() > 0)
 		{
 			Object[] textArgs = { "x", X , "y", Y, "width", DEFAULT_WIDTH, "height", LINE_HEIGHT, "text", title,  "fontSize", 24, "fontFamily", "Serif" };
-			Map<String,String> strs = factory.ezMap(textArgs);
+			Map<String,String> strs = LegendFactory.ezMap(textArgs);
 			TextAnnotation textBox = factory.createTextAnnotation(TextAnnotation.class, networkView, strs);
 			textBox.setCanvas("background");
 			annotationMgr.addAnnotation(textBox);
@@ -179,7 +166,7 @@ public class LegendController {
 		if (subtitle.length() > 0)
 		{
 			Object[] textArgs = { "x", X , "y", Y, "width", DEFAULT_WIDTH, "height", LINE_HEIGHT, "text", subtitle,  "fontSize", 14, "fontFamily", "SansSerif" };
-			Map<String,String> strs = factory.ezMap(textArgs);
+			Map<String,String> strs = LegendFactory.ezMap(textArgs);
 			TextAnnotation textBox = factory.createTextAnnotation(TextAnnotation.class, networkView, strs);
 			textBox.setCanvas("background");
 			annotationMgr.addAnnotation(textBox);
@@ -226,7 +213,7 @@ public class LegendController {
 		if (borderBox)
 		{
 			Object[] boxArgs = { "x", startX - HALFSPACE, "y", startY - HALFSPACE , "width", totalWidth, "height", totalHeight,  "shapeType" , "Rectangle"};
-			Map<String,String> strs = factory.ezMap(boxArgs);
+			Map<String,String> strs = LegendFactory.ezMap(boxArgs);
 			ShapeAnnotation lineBox = factory.createShapeAnnotation(ShapeAnnotation.class, networkView, strs);
 			annotationMgr.addAnnotation(lineBox);
 		}
@@ -364,8 +351,7 @@ public class LegendController {
 	  boolean isVisible()						{ 	return visible;	}
 	  
 	@Override public int compareTo(LegendCandidate o) {
-		
-
+	
 		VisualProperty<?> prop = func.getVisualProperty();
 		String dispName = prop.getDisplayName();
 		VisualProperty<?> otherProp = o.getFunction().getVisualProperty();
@@ -425,7 +411,7 @@ public class LegendController {
 
 		W = 500;
 		H = 200;
-		GroupAnnotation continuousLegend = factory.addTrapezoidLegend("Node Size: Expression", X, Y, W, H, 12, 45, Color.LIGHT_GRAY);
+		GroupAnnotation continuousLegend = factory.addTrapezoidLegend("Node Size: Expression", X, Y, W, H, null, Color.LIGHT_GRAY);
 		annotationMgr.addAnnotation(continuousLegend);
 		X += layoutVertically ? 0 : W + SPACER;  	
 		Y += layoutVertically ? H + SPACER : 0;	
@@ -464,7 +450,7 @@ public class LegendController {
 		if (borderBox)
 		{
 			Object[] boxArgs = { "x", startX - HALFSPACE, "y", startY - HALFSPACE , "width", totalWidth, "height", totalHeight,  "shapeType" , "Rectangle"};
-			Map<String,String> strs = factory.ezMap(boxArgs);
+			Map<String,String> strs = LegendFactory.ezMap(boxArgs);
 			ShapeAnnotation lineBox = factory.createShapeAnnotation(ShapeAnnotation.class, networkView, strs);
 			annotationMgr.addAnnotation(lineBox);
 		};

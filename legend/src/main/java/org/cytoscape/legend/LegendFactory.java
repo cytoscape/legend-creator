@@ -9,6 +9,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,12 +20,12 @@ import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.annotations.AnnotationFactory;
 import org.cytoscape.view.presentation.annotations.AnnotationManager;
 import org.cytoscape.view.presentation.annotations.ArrowAnnotation;
-import org.cytoscape.view.presentation.annotations.GroupAnnotation;
-import org.cytoscape.view.presentation.annotations.ShapeAnnotation;
-import org.cytoscape.view.presentation.annotations.TextAnnotation;
 import org.cytoscape.view.presentation.annotations.ArrowAnnotation.AnchorType;
 import org.cytoscape.view.presentation.annotations.ArrowAnnotation.ArrowEnd;
+import org.cytoscape.view.presentation.annotations.GroupAnnotation;
+import org.cytoscape.view.presentation.annotations.ShapeAnnotation;
 import org.cytoscape.view.presentation.annotations.ShapeAnnotation.ShapeType;
+import org.cytoscape.view.presentation.annotations.TextAnnotation;
 import org.cytoscape.view.presentation.property.values.LineType;
 import org.cytoscape.view.vizmap.mappings.BoundaryRangeValues;
 import org.cytoscape.view.vizmap.mappings.ContinuousMapping;
@@ -78,15 +79,19 @@ public class LegendFactory {
 		VisualProperty<?> prop = continFn.getVisualProperty();
 		String dispName = prop.getDisplayName();
 		BoundaryRangeValues<Double> range = getFunctionRange(continFn);
+		BoundaryRangeValues<Double> rangeY = getFunctionRangeY(continFn);
 		double minimum = range.lesserValue;
 		double maximum = range.greaterValue;
+		double minimumY = range.lesserValue;
+		double maximumY = range.greaterValue;
 		v = prop.getDefault();
 		String title = dispName + ":  " + continFn.getMappingColumnName();
 		if (verbose)
 		{
 			System.out.print(title + " has range (" + minimum + "  - " + maximum + ") "); 					
+			System.out.print(title + " has Y range (" + rangeY.lesserValue + "  - " + rangeY.greaterValue + ") "); 					
 			System.out.println(title + " and is of type " + getType(v)); 					
-			System.out.println("Draw box: " + (borderBox ? "true" : "false")); 					
+			System.out.println("Draw box: " + (borderBox ? "true" : "false")); 	
 		}
 		
 		RIGHT_MARGIN = 0;
@@ -96,7 +101,7 @@ public class LegendFactory {
 		else if (isFontSize(v))
 			legend = addFontSizeLegend(title, X, Y, ioSize, minimum, maximum, Color.LIGHT_GRAY);
 		else if (isNumeric(v))
-			legend = addTrapezoidLegend(title, X, Y, width, height, minimum, maximum, Color.LIGHT_GRAY);
+			legend = addTrapezoidLegend(title, X, Y, width, height, continFn, Color.LIGHT_GRAY);
 		ioSize.width += RIGHT_MARGIN;
 		
 		if (legend != null)
@@ -113,6 +118,9 @@ public class LegendFactory {
 		for (ContinuousMappingPoint<?, ?> pt : list)
 		{
 			Double v = (Double) pt.getValue();
+			BoundaryRangeValues range = pt.getRange();
+//			System.out.println(String.format("value:  %3.1f", v));
+//			System.out.println("range: " + range.equalValue);
 			if (v instanceof Double)
 			{
 				minimum = Math.min(minimum, (Double) v);
@@ -121,6 +129,60 @@ public class LegendFactory {
 		}
 		BoundaryRangeValues<Double> range = new BoundaryRangeValues<Double>(minimum,maximum,maximum);
 		return range;
+		
+	}
+	private BoundaryRangeValues<Double> getFunctionRangeY(ContinuousMapping<?, ?> continFn)
+	{
+		Object pts = continFn.getAllPoints();
+		List<ContinuousMappingPoint<?, ?>> list = (List<ContinuousMappingPoint<?, ?>>) pts;
+		double minimumY = Double.MAX_VALUE;
+		double maximumY = Double.MIN_VALUE;
+		for (ContinuousMappingPoint<?, ?> pt : list)
+		{
+			Double v = (Double) pt.getValue();
+			BoundaryRangeValues range = pt.getRange();
+//			System.out.println(String.format("range:  %3.1f", v));
+//			System.out.println("range: " + range.equalValue);
+			if (range.equalValue instanceof Double)
+			{
+				minimumY = Math.min(minimumY, (Double) range.equalValue);
+				maximumY = Math.max(maximumY, (Double) range.equalValue);
+			}
+			if (range.equalValue instanceof Integer)
+			{
+				minimumY = Math.min(minimumY, (Integer) range.equalValue);
+				maximumY = Math.max(maximumY, (Integer) range.equalValue);
+			}
+		}
+		BoundaryRangeValues<Double> range = new BoundaryRangeValues<Double>(minimumY,maximumY,maximumY);
+		return range;
+		
+	}
+
+
+	private List<Point2D> getPoints(ContinuousMapping<?, ?> continFn)
+	{
+		Object pts = continFn.getAllPoints();
+		List<ContinuousMappingPoint<?, ?>> list = (List<ContinuousMappingPoint<?, ?>>) pts;
+		List<Point2D> pointlist = new ArrayList<Point2D>();
+		double minimumY = Double.MAX_VALUE;
+		double maximumY = Double.MIN_VALUE;
+		for (ContinuousMappingPoint<?, ?> pt : list)
+		{
+			Double v = (Double) pt.getValue();
+			BoundaryRangeValues range = pt.getRange();
+			Double y = 0.;
+			if (range.equalValue instanceof Integer)
+				y = 0.0 + (Integer) range.equalValue;
+			else if (range.equalValue instanceof Double)
+				y = (Double) range.equalValue;
+			
+//			System.out.println("( " + v + ", " + range.equalValue);
+			Point2D coords = new Point2D.Double(v,y);
+			pointlist.add(coords);
+
+		}
+		return pointlist;
 		
 	}
 
@@ -390,18 +452,58 @@ public class LegendFactory {
 	//------------------------------------------------------------------
 	// continuous
 	
-	public GroupAnnotation addTrapezoidLegend(String title, int x, int y, int w, int h, double min, double max, Color color)
+	public GroupAnnotation addTrapezoidLegend(String title, int x, int y, int w, int h, ContinuousMapping<?, ?> continFn, Color color)
 	{
 		GroupAnnotation group = createGroupWithHeader( title,  x,  y,  w,  h);
 		addBorderBox(group, x, y, w, h);
-
+		double minx = Double.MAX_VALUE, miny = Double.MAX_VALUE, maxx = Double.MIN_VALUE, maxy = Double.MIN_VALUE;
 		GeneralPath path = new GeneralPath();
-		path.moveTo(x, y + h);
-		path.lineTo(x, y + (0.8 * h));
-		path.lineTo(x + w, y);
-		path.lineTo(x + w, y + h);
-		path.lineTo(x, y + h);
-        path.closePath();
+
+		if (continFn != null)
+		{
+			List<Point2D> pts = getPoints(continFn);
+			for (Point2D pt : pts)
+			{
+				double X = pt.getX();
+				double Y = pt.getY();
+				minx = Math.min(minx, X);
+				miny = Math.min(miny, Y);
+				maxx = Math.max(maxx, X);
+				maxy = Math.max(maxy, Y);
+			}
+			for (Point2D pt : pts)
+				System.out.println(String.format("( %3.1f, %3.1f )", pt.getX(),pt.getY())); 	
+			
+			double xRange = ((double) w) / (maxx - minx);
+			double yRange = ((double) h) / (maxy - miny);
+			System.out.println(String.format("X RANGE: ( %3.1f, %3.1f)  %3.1f", minx,maxx, (double) w)); 	
+			System.out.println(String.format("Y RANGE: ( %3.1f, %3.1f) %3.1f", miny,maxy, (double) h)); 	
+			System.out.println(String.format("RANGES: ( %3.1f, %3.1f)", xRange,yRange)); 	
+
+			path.moveTo(x, y + h);
+			for (Point2D pt : pts)
+			{
+				int xPixels = (int)(xRange * (pt.getX() - minx));
+				int yPixels =  (int)(yRange * (pt.getY() - miny));
+				
+				System.out.println(String.format("( %3.1f, %3.1f = %d, %d)", pt.getX(),pt.getY(), xPixels, yPixels)); 	
+				path.lineTo(x + xPixels, y + h - yPixels);
+
+			}
+			path.lineTo(x + w, y);
+			path.lineTo(x + w, y + h);
+			path.lineTo(x, y + h);
+	        path.closePath();
+		}
+		else
+		{
+			path.moveTo(x, y + h);
+			path.lineTo(x, y + (0.8 * h));
+			path.lineTo(x + w, y);
+			path.lineTo(x + w, y + h);
+			path.lineTo(x, y + h);
+	        path.closePath();
+		}
 		
         Map<String,String> trapezoidArgs = new HashMap<String,String>();
 		trapezoidArgs.put("x", "" + x);
@@ -418,8 +520,8 @@ public class LegendFactory {
 //		trapezoid.setCanvas("background");
 //		annotationMgr.addAnnotation(trapezoid);
 		group.addMember(trapezoid);		
-		addTicks(x,y,w,h,min, max, group, false);
-		addYTicks(x,y,w,h,min, max, group);
+		addTicks(x,y,w,h,minx, maxx, group, false);
+		addYTicks(x,y,w,h,miny, maxy, group);
 		return group;
 
 	}	
