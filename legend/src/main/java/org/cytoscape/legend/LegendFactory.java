@@ -396,11 +396,11 @@ public class LegendFactory {
 		addBorderBox(group, x, y, w, h);
 
 		GeneralPath path = new GeneralPath();
-		path.moveTo(x, y);
-		path.lineTo(x + w * 0.2,y);
+		path.moveTo(x, y + h);
+		path.lineTo(x, y + (0.8 * h));
+		path.lineTo(x + w, y);
 		path.lineTo(x + w, y + h);
 		path.lineTo(x, y + h);
-		path.lineTo(x, y);
         path.closePath();
 		
         Map<String,String> trapezoidArgs = new HashMap<String,String>();
@@ -419,6 +419,7 @@ public class LegendFactory {
 //		annotationMgr.addAnnotation(trapezoid);
 		group.addMember(trapezoid);		
 		addTicks(x,y,w,h,min, max, group, false);
+		addYTicks(x,y,w,h,min, max, group);
 		return group;
 
 	}	
@@ -591,6 +592,56 @@ public class LegendFactory {
 			int halfStringWidth = strWidth / 2;
 			tickLabels.put("x", orientVertically ? "" + (xt  + 5 + TICKWIDTH) : ("" + (xt - halfStringWidth)));
 			tickLabels.put("y", orientVertically ? "" + (yt-FONTSIZE/2.0) : ("" + (int) (yt  + 5 + TICKWIDTH)));
+			tickLabels.put("width", "" + LABELWIDTH);
+			tickLabels.put("height", "" + LABELHEIGHT);
+			tickLabels.put("fontSize", "" + FONTSIZE);
+			tickLabels.put("fontFamily", fontFamily);
+			tickLabels.put("fontStyle", "" + Font.PLAIN);
+
+			vals[t] = textFactory.createAnnotation(TextAnnotation.class, networkView, tickLabels);
+			group.addMember(vals[t]);
+			
+		}
+	}
+
+	private void addYTicks(int x, int y, int w, int h, double min, double max,GroupAnnotation group)
+	{
+		int TICKS = 2;
+		int TICKWIDTH = 10;
+		int LABELWIDTH = 35;
+		int LABELHEIGHT = 15;
+		Font labelFont = getLabelFont();
+		int FONTSIZE = labelFont.getSize();
+		String fontFamily = labelFont.getFamily();
+		double BORDERWIDTH = 1.5;
+		RIGHT_MARGIN = TICKWIDTH + LABELWIDTH;
+		ShapeAnnotation[] ticks = new ShapeAnnotation[TICKS];
+		TextAnnotation[] vals = new TextAnnotation[TICKS];
+		
+		for (int t = 0; t < TICKS; t++)
+		{
+			double xt = x - TICKWIDTH;
+			double yt = y + h - (t * h);
+			
+			Map<String,String> tickArgs = new HashMap<String,String>();
+			tickArgs.put("x", "" + xt);
+			tickArgs.put("y", "" + yt);
+			tickArgs.put("width", "" + TICKWIDTH);
+			tickArgs.put("height", "1");
+			tickArgs.put("shapeType", "Rectangle");
+			ticks[t] = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, tickArgs);
+			ticks[t].setFillColor(Color.BLACK);
+			ticks[t].setBorderWidth(BORDERWIDTH);
+			group.addMember(ticks[t]);
+	
+			Map<String,String> tickLabels = new HashMap<String,String>();
+			double val = min + t * (max - min);
+			String formattedStr = String.format("%3.0f", val);
+			tickLabels.put("text", "" + formattedStr);
+			int strWidth = getStringWidth(formattedStr, labelFont);
+//			int halfStringWidth = strWidth / 2;
+			tickLabels.put("x", "" + (xt - strWidth - 5));
+			tickLabels.put("y", "" + (yt -FONTSIZE/2.0));
 			tickLabels.put("width", "" + LABELWIDTH);
 			tickLabels.put("height", "" + LABELHEIGHT);
 			tickLabels.put("fontSize", "" + FONTSIZE);
