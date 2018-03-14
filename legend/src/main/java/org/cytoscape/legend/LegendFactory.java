@@ -153,6 +153,11 @@ public class LegendFactory {
 				minimumY = Math.min(minimumY, (Integer) range.equalValue);
 				maximumY = Math.max(maximumY, (Integer) range.equalValue);
 			}
+			if (range.equalValue instanceof Color)		// TODO
+			{
+				minimumY = Math.min(minimumY, ((Color) range.equalValue).getRGB());
+				maximumY = Math.max(maximumY, ((Color) range.equalValue).getRGB());
+			}
 		}
 		BoundaryRangeValues<Double> range = new BoundaryRangeValues<Double>(minimumY,maximumY,maximumY);
 		return range;
@@ -497,6 +502,10 @@ public class LegendFactory {
 		}
 		else
 		{
+			minx = 0; 
+			miny = 10; 
+			maxx = 4;
+			maxy = 20;
 			path.moveTo(x, y + h);
 			path.lineTo(x, y + (0.8 * h));
 			path.lineTo(x + w, y);
@@ -603,15 +612,9 @@ public class LegendFactory {
 	{
 		GroupAnnotation group = createGroupWithHeader( title,  x,  y,  w,  h);
 		ShapeAnnotation gradientBox = addBorderBox(group, x, y, w, h);
-//		boolean orientVertically = false;
 
 		Point2D start = new Point2D.Float(0, 0);
 		Point2D end = new Point2D.Float(1f,0);
-//		if (orientVertically)
-//		{
-//			start = new Point2D.Float(0, 0);
-//			end = new Point2D.Float(0, 1);
-//		}
 		LinearGradientPaint p = new LinearGradientPaint(start, end, stops, colors);		
 		gradientBox.setFillColor(p);
 		addTicks(x,y,w,h,min, max, group, false);

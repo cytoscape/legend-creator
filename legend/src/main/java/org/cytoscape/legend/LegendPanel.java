@@ -21,6 +21,7 @@ import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.legend.LegendController.LegendCandidate;
 import org.cytoscape.service.util.CyServiceRegistrar;
+import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.vizmap.VisualMappingFunction;
 
@@ -31,13 +32,29 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 	private LegendController controller;
 	private JPanel optionsPanel;
 	
+	public Component getComponent() 				{		return this;	}
+	public CytoPanelName getCytoPanelName() 		{		return CytoPanelName.WEST;	}
+	public String getTitle() 					{		return "Legend Panel";	}
+	public Icon getIcon() 						{		return null;	}
+
+	JCheckBox 		layoutVertical = new JCheckBox("Lay out Vertically");
+	JCheckBox  		drawBorder = new JCheckBox("Draw Border Box");
+	JLabel curNetNameLabel = new JLabel("no network selected");
+	JTextField title  = new JTextField();
+	JTextField subtitle  = new JTextField();
+	
+	JButton adder = new JButton("Add Legend");
+	JButton selectAll = new JButton("Select All Annotations");
+	JButton clearAll = new JButton("Remove All Annotations");
+
+	//--------------------------------------------------------------------
 	public LegendPanel(CyServiceRegistrar reg, LegendController ctrl) {
 		controller = ctrl;
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
 		JPanel intro = new JPanel();
 		intro.setLayout(new BoxLayout(intro, BoxLayout.PAGE_AXIS));
-		intro.add(line(new JLabel("Legend")));
+		intro.add(line(new JLabel("Legends are drawn as annotations in the background canvas.")));
 		intro.add(line(new JLabel("Use these controls to customize your legend")));
 		add(intro);
 
@@ -49,6 +66,7 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 		JButton scanner = new JButton("Scan Network");
 		ActionListener scan = new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) { 
+				setCurrentNetwork();
 				controller.scanNetwork();
 				optionsPanel.removeAll();
 				for (LegendCandidate candidate : controller.getCandidates())
@@ -68,26 +86,21 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 			}
 		};
 		scanner.addActionListener(scan);
-		add(line(scanner, new JLabel("(automate me)")));
+		add(line(scanner,curNetNameLabel));
 		
 		JLabel titlePrompt = new JLabel("Title");
-		title = new JTextField();
-		title.setMaximumSize(new Dimension(300, 28));
-		title.setPreferredSize(new Dimension(200, 28));
-		title.setMinimumSize(new Dimension(200, 28));
-		JLabel subtitlePrompt = new JLabel("Include Subtitle");
+		titlePrompt.setPreferredSize(new Dimension(60, 28));
+		title.setMaximumSize(new Dimension(340, 28));
+		title.setPreferredSize(new Dimension(240, 28));
+		title.setMinimumSize(new Dimension(240, 28));
+		JLabel subtitlePrompt = new JLabel("Subtitle");
+		subtitlePrompt.setPreferredSize(new Dimension(60, 28));
 //		showDate = new JCheckBox("Include Date");
 		subtitle = new JTextField();
-		subtitle.setMaximumSize(new Dimension(300, 28));
-		subtitle.setPreferredSize(new Dimension(200, 28));
-		subtitle.setMinimumSize(new Dimension(200, 28));
-		ActionListener echo = new ActionListener() {
-			@Override public void actionPerformed(ActionEvent e) { System.out.println(e.getActionCommand()); }
-		};
-//		showUserTitle.addActionListener(echo);
-//		showSubtitle.addActionListener(echo);
-//		showDate.addActionListener(echo);
-		
+		subtitle.setMaximumSize(new Dimension(340, 28));
+		subtitle.setPreferredSize(new Dimension(240, 28));
+		subtitle.setMinimumSize(new Dimension(240, 28));
+
 		add(line(titlePrompt, title));
 		add(line(subtitlePrompt, subtitle));
 //		add(line(showDate));
@@ -96,39 +109,14 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 
 		optionsPanel.add(Box.createGlue());
 
-//		orientVertical = new JCheckBox("Orient Vertically", true);
-//		orientVertical.addActionListener(echo);
-//		add(line(orientVertical));
-
-		layoutVertical = new JCheckBox("Lay out Vertically");
-		layoutVertical.addActionListener(echo);
 		add(line(layoutVertical));
-
-		drawBorder = new JCheckBox("Draw Border Box");
-		drawBorder.addActionListener(echo);
 		add(line(drawBorder));
 
-		JButton adder = new JButton("Add Legend");
 		ActionListener layout = new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) { controller.layout(); }
 		};
 		adder.addActionListener(layout);
 		add(line(adder));
-
-		JButton selectAll = new JButton("Select All Annotations");
-		ActionListener selAll = new ActionListener() {
-			@Override public void actionPerformed(ActionEvent e) { controller.selectAllAnnotations();  }
-		};
-		selectAll.addActionListener(selAll);
-		add(line(selectAll));
-
-		
-		JButton clearAll = new JButton("Remove All Annotations");
-		ActionListener clr = new ActionListener() {
-			@Override public void actionPerformed(ActionEvent e) { controller.clearAnnotations();  }
-		};
-		clearAll.addActionListener(clr);
-		add(line(clearAll));
 
 		JButton tester = new JButton("Test");
 		ActionListener test = new ActionListener() {
@@ -137,25 +125,42 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 		tester.addActionListener(test);
 		add(line(tester));
 
+		add(Box.createVerticalGlue());
+		ActionListener selAll = new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) { controller.selectAllAnnotations();  }
+		};
+		selectAll.addActionListener(selAll);
+		add(line(selectAll));
+
+		ActionListener clrAll = new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) { controller.clearAnnotations();  }
+		};
+		clearAll.addActionListener(clrAll);
+		add(line(clearAll));
+
 		setVisible(true);
 	}
-//	JCheckBox orientVertical;
-	JCheckBox layoutVertical;
-	JCheckBox drawBorder;
 	
-//	JCheckBox showDate;
-	JTextField title;
-	JTextField subtitle;
+	JComponent[] ctrls = {adder, selectAll, clearAll, title, subtitle};
+	public void enableControls(boolean on)
+	{
+		for (JComponent component : ctrls)
+			component.setEnabled(on);
+	}
 	
+	public void setCurrentNetwork()
+	{
+		CyNetworkView view = controller.getNetworkView();
+		curNetNameLabel.setText(view == null ? "no current network" : "" + view.getSUID());
+		enableControls(view != null);
+	}
+	//--------------------------------------------------------------------
 	public void extract()
 	{
-//		controller.setOrientation(orientVertical.isSelected());
 		controller.setLayout(layoutVertical.isSelected());
 		controller.setDrawBorder(drawBorder.isSelected());
-
 		controller.setTitle(title.getText());
 		controller.setSubtitle(subtitle.getText());
-//		controller.setShowDate(showDate.isSelected());
 	}
 	
 	private JPanel line(JComponent sub)
@@ -181,11 +186,6 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 	}
 
 	List<JCheckBox> options;
-	
-	public Component getComponent() 				{		return this;	}
-	public CytoPanelName getCytoPanelName() 		{		return CytoPanelName.WEST;	}
-	public String getTitle() 					{		return "Legend Panel";	}
-	public Icon getIcon() 						{		return null;	}
 
 }
 

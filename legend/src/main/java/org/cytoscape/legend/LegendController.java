@@ -13,6 +13,9 @@ import java.util.Map;
 import javax.swing.JCheckBox;
 
 import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.application.swing.CytoPanelName;
+import org.cytoscape.application.swing.events.CytoPanelComponentSelectedEvent;
+import org.cytoscape.application.swing.events.CytoPanelComponentSelectedListener;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -52,7 +55,7 @@ import org.cytoscape.view.vizmap.mappings.DiscreteMapping;
  * one GroupAnnotation for each attribute that is checked.
  */
 
-public class LegendController {
+public class LegendController implements CytoPanelComponentSelectedListener {
 
 	private CyServiceRegistrar registrar;
 	public LegendController(CyServiceRegistrar reg)
@@ -77,12 +80,11 @@ public class LegendController {
 		network = cyApplicationManager.getCurrentNetwork();
 		networkView = cyApplicationManager.getCurrentNetworkView();
 		factory = new LegendFactory(registrar, networkView);
-//		double width = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_WIDTH);
-//		double height = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_WIDTH);
-
-
 	}
 	//-------------------------------------------------------------------
+		public CyNetworkView getNetworkView()		{ 	 return networkView;		}
+		
+		
 		public void scanNetwork() {
 
 		initialize();
@@ -91,7 +93,7 @@ public class LegendController {
 		// Now we cruise thru the list of node, then edge attributes looking for mappings.  Each mapping may potentially be a legend entry.
 		VisualMappingManager manager = (VisualMappingManager) registrar.getService( VisualMappingManager.class);
 		VisualStyle style = manager.getCurrentVisualStyle();
-		System.out.println("style: " + style.getTitle());
+//		System.out.println("style: " + style.getTitle());
 		findLegendCandidates(style);
 	}
 	
@@ -110,25 +112,27 @@ public class LegendController {
 		Collections.sort(candidates);
 		
 	}
+	
+	public void setCurrentNetView(CyNetworkView newView)
+	{
+		if (newView == null) return;		// use ""
+		if (newView.getSUID() == currentNetworkView.getSUID()) return;
+		currentNetworkView = newView;
+		legendPanel.enableControls(currentNetworkView != null);
+		
+	}
 	//-------------------------------------------------------------------------------
-//	boolean orientVertically = true;
-	boolean layoutVertically = false;
-	boolean borderBox = false;
-
-//	boolean showSubtitle = true;
-//	boolean showUserTitle = false;
-//	boolean showDate = false;
-
-	String title;
-	String subtitle;
+	private boolean layoutVertically = false;
+	private boolean borderBox = false;
+	private String title;
+	private String subtitle;
+	private CyNetworkView currentNetworkView;
 	
-//	public void setOrientation(boolean vert)	{ orientVertically = vert;	}
-	public void setLayout(boolean vert)		{ layoutVertically = vert;	}
-	public void setDrawBorder(boolean show)	{ borderBox = show;	factory.setDrawBorder(show);}
+	public void setLayout(boolean vert)		{ 	layoutVertically = vert;	}
+	public void setDrawBorder(boolean show)	{ 	borderBox = show;	factory.setDrawBorder(show);}
 	
-	public void setTitle(String txt) 	{  title = txt;}
-	public void setSubtitle(String txt) 		{ subtitle = txt; }
-//	public void setShowDate(boolean b) 		{ showDate = b;	}
+	public void setTitle(String txt) 		{  	title = txt;}
+	public void setSubtitle(String txt) 		{ 	subtitle = txt; }
 
 	//-------------------------------------------------------------------------------
 	public void layout()
@@ -137,15 +141,22 @@ public class LegendController {
 			candidate.extract();			
 		if (legendPanel != null)
 			legendPanel.extract();
+				
+//		int X = 500;			// starting point
+//		int Y = 500;
 		
-//		System.out.println(orientVertically ? "Tall" : "Wide");
-		System.out.println(layoutVertically ? "Stacked" : "Neighbors");
 		
-		int X = 500;			// starting point
-		int Y = 500;
+		double width = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_WIDTH);
+		double height = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_WIDTH);
+
+		double centerX  = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_CENTER_X_LOCATION);
+		double centerY  = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_CENTER_Y_LOCATION);
+		int X = (int) (centerX - width / 2.0);
+		int Y = (int) (centerY + height / 2.0);
+		
 		int startX = X;
 		int startY = Y;
-		int DEFAULT_WIDTH = 500;			// starting point
+		int DEFAULT_WIDTH = 500;	 
 		int DEFAULT_HEIGHT = 100;
 		int dX = layoutVertically ? 0 : 500;
 		int dY = layoutVertically ? 500 : 0;			
@@ -549,16 +560,18 @@ public class LegendController {
 
 	public void clearAnnotations() {
 		if (annotationMgr == null || networkView == null)
-		{
-			System.out.println("annotationMgr:  " + annotationMgr + "  networkView: " + networkView);
-			return;
-		}
-	
-		for (Annotation a: annotationMgr.getAnnotations(networkView)) {
-		    if (a == null) return;
-			System.out.println("a:  " + a);
+			System.err.println("annotationMgr:  " + annotationMgr + "  networkView: " + networkView);
+		else for (Annotation a: annotationMgr.getAnnotations(networkView)) {
+		    if (a == null) continue;
 		    annotationMgr.removeAnnotation(a);
 		}
+		
+	}
+	@Override
+	public void handleEvent(CytoPanelComponentSelectedEvent arg0) {
+		CytoPanelName panel = arg0.getCytoPanel().getCytoPanelName();
+		String name = arg0.getCytoPanel().getSelectedComponent().getName();
+		System.out.println("ZXXXXXXXFDVSGDF  " + panel.getTitle() + ": " + name);
 		
 	}
 	
