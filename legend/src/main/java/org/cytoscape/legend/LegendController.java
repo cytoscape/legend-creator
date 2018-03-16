@@ -250,6 +250,8 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 		VisualProperty<?> prop = fn.getVisualProperty();
 		String dispName = prop.getDisplayName();
 		GroupAnnotation legend = null;
+		String columnName = fn.getMappingColumnName();
+//		List<String> values = getAllValues(columnName);
 		Map<NodeShape, CyNode> used = getUsedShapes();
 		if ("Node Shape".equals(dispName))
 		{
@@ -487,21 +489,37 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 	//-------------------------------------------------------------------
 	  
 	  boolean verbose = true;
-	private Map<NodeShape, CyNode> getUsedShapes()
-	{
-		Map<NodeShape, CyNode> shapeTypeMap = new HashMap<NodeShape, CyNode>();
-		Collection<View<CyNode>> nodeViews = networkView.getNodeViews();
-		for (View<CyNode> nodeView : nodeViews)
+		private Map<NodeShape, CyNode> getUsedShapes()
 		{
-			 NodeShape shape = (NodeShape) nodeView.getVisualProperty(BasicVisualLexicon.NODE_SHAPE);
-			 shapeTypeMap.put(shape, nodeView.getModel());
-//			 NodeShape defaultshape = (NodeShape) nodeView.getVisualProperty(BasicVisualLexicon.NODE_SHAPE);
-		}
-//		 shapeTypeMap.put(shape, null);
+			Map<NodeShape, CyNode> shapeTypeMap = new HashMap<NodeShape, CyNode>();
+			Collection<View<CyNode>> nodeViews = networkView.getNodeViews();
+			for (View<CyNode> nodeView : nodeViews)
+			{
+				 NodeShape shape = (NodeShape) nodeView.getVisualProperty(BasicVisualLexicon.NODE_SHAPE);
+				 shapeTypeMap.put(shape, nodeView.getModel());
+//				 NodeShape defaultshape = (NodeShape) nodeView.getVisualProperty(BasicVisualLexicon.NODE_SHAPE);
+			}
+//			 shapeTypeMap.put(shape, null);
 
-		 System.out.println("shapes " + shapeTypeMap.size() + "  " + shapeTypeMap.keySet());
-		return shapeTypeMap;
-	}
+			 System.out.println("shapes " + shapeTypeMap.size() + "  " + shapeTypeMap.keySet());
+			return shapeTypeMap;
+		}
+		private Map<NodeShape, CyNode> getAllValues(String column)
+		{
+			Map<NodeShape, CyNode> shapeTypeMap = new HashMap<NodeShape, CyNode>();
+			Collection<View<CyNode>> nodeViews = networkView.getNodeViews();
+			for (View<CyNode> nodeView : nodeViews)
+			{
+				 NodeShape shape = (NodeShape) nodeView.getVisualProperty(BasicVisualLexicon.NODE_SHAPE);
+				 
+				 shapeTypeMap.put(shape, nodeView.getModel());
+//				 NodeShape defaultshape = (NodeShape) nodeView.getVisualProperty(BasicVisualLexicon.NODE_SHAPE);
+			}
+//			 shapeTypeMap.put(shape, null);
+
+			 System.out.println("shapes " + shapeTypeMap.size() + "  " + shapeTypeMap.keySet());
+			return shapeTypeMap;
+		}
 	
 	private Map<Paint, CyNode> getUsedFillColors()
 	{
