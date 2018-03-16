@@ -51,6 +51,7 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 	public LegendPanel(CyServiceRegistrar reg, LegendController ctrl) {
 		controller = ctrl;
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+		controller.setLegendPanel(this);
 
 		JPanel intro = new JPanel();
 		intro.setLayout(new BoxLayout(intro, BoxLayout.PAGE_AXIS));
@@ -96,7 +97,6 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 		JLabel subtitlePrompt = new JLabel("Subtitle");
 		subtitlePrompt.setPreferredSize(new Dimension(60, 28));
 //		showDate = new JCheckBox("Include Date");
-		subtitle = new JTextField();
 		subtitle.setMaximumSize(new Dimension(340, 28));
 		subtitle.setPreferredSize(new Dimension(240, 28));
 		subtitle.setMinimumSize(new Dimension(240, 28));
@@ -151,7 +151,7 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 	public void setCurrentNetwork()
 	{
 		CyNetworkView view = controller.getNetworkView();
-		curNetNameLabel.setText(view == null ? "no current network" : "" + view.getSUID());
+		curNetNameLabel.setText(view == null ? "no current network" : "" + view.getModel());
 		enableControls(view != null);
 	}
 	//--------------------------------------------------------------------

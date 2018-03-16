@@ -218,6 +218,7 @@ public class LegendFactory {
 		int NLINES = colors.length;
 
 		GroupAnnotation group = createGroupWithHeader(title, x, y, (int) width, (int) height);
+		if (group == null) return null;
 		addBorderBox(group, x, y, (int) width, (int) height);
 		for (int i=0; i < NLINES; i++)
 		{
@@ -247,7 +248,6 @@ public class LegendFactory {
 		return group;
 	}
 	//------------------------------------------------------------------
-	// discrete
 	
 	int getMaxLabelWidth(String[] labels, Font font)
 	{
@@ -266,6 +266,8 @@ public class LegendFactory {
 		return getStringHeight(text, font);
 	}
 
+	//------------------------------------------------------------------
+	// discrete
 	public GroupAnnotation addShapeLegend(String title, int x, int y, Dimension ioSize, ShapeType[] shapes, String[] names)
 	{
 		int MARGIN = 10;			
@@ -287,6 +289,7 @@ public class LegendFactory {
 
 
 		GroupAnnotation group = createGroupWithHeader(title, x, y, width, height + MARGIN);
+		if (group == null) return null;
 		addBorderBox(group, x, y, (int) width, (int) height + MARGIN);
 		
 		for (int i=0; i < NCELLS; i++)
@@ -345,6 +348,7 @@ public class LegendFactory {
 		ioSize.setSize(width, height);
 	
 		GroupAnnotation group = createGroupWithHeader(title, x, y, width, height);
+		if (group == null) return null;
 		addBorderBox(group, x, y,  width, height);
 		
 		int i = 0;
@@ -414,6 +418,7 @@ public class LegendFactory {
 		int height = 2 * MARGIN +  (orientVertically ? (CELL_HEIGHT * NCELLS) : (CELL_HEIGHT + LABEL_HEIGHT));
 		ioSize.setSize(width, height);
 		GroupAnnotation group = createGroupWithHeader(title, x, y, width, height);
+		if (group == null) return null;
 		addBorderBox(group, x, y, width, height);
 		
 		for (int i = 0; i < arrows.length; i++)
@@ -460,6 +465,7 @@ public class LegendFactory {
 	public GroupAnnotation addTrapezoidLegend(String title, int x, int y, int w, int h, ContinuousMapping<?, ?> continFn, Color color)
 	{
 		GroupAnnotation group = createGroupWithHeader( title,  x,  y,  w,  h);
+		if (group == null) return null;
 		addBorderBox(group, x, y, w, h);
 		double minx = Double.MAX_VALUE, miny = Double.MAX_VALUE, maxx = Double.MIN_VALUE, maxy = Double.MIN_VALUE;
 		GeneralPath path = new GeneralPath();
@@ -542,6 +548,7 @@ public class LegendFactory {
 		int w = inSize.width;  
 		int h = inSize.height; 
 		GroupAnnotation group = createGroupWithHeader( title,  x,  y,  w,  h);
+		if (group == null) return null;
 		addBorderBox(group, x, y, w, h);
 		
 		String[] text = { "smallest", "small", "median", "large", "largest"};
@@ -611,6 +618,7 @@ public class LegendFactory {
 	public GroupAnnotation addGradientLegend(String title, int x, int y, int w, int h, double min, double max, Color[] colors, float[] stops)
 	{
 		GroupAnnotation group = createGroupWithHeader( title,  x,  y,  w,  h);
+		if (group == null) return null;
 		ShapeAnnotation gradientBox = addBorderBox(group, x, y, w, h);
 
 		Point2D start = new Point2D.Float(0, 0);
@@ -630,6 +638,7 @@ public class LegendFactory {
 		String fontFamily = labelFont.getFamily();
 		String[] groupArgs = { "x", "" + x, "y", "" + y,  "width", "" + w,  "height", "" + h};
 		GroupAnnotation group = groupFactory.createAnnotation(GroupAnnotation.class, networkView, ezMap(groupArgs));
+		if (group == null) return null;
 		group.setCanvas("background");
 		float LINE_HEIGHT = 28;
 		Object[] titleArgs = { "x", x, "y", y-LINE_HEIGHT, "width", w, "height", LINE_HEIGHT, "text", title};

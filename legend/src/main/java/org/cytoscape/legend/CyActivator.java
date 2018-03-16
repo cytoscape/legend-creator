@@ -19,16 +19,17 @@ public class CyActivator extends AbstractCyActivator {
 
 
 	public void start(BundleContext bc) {
-		CySwingApplication cytoscapeDesktopService = getService(bc,CySwingApplication.class);
+		CySwingApplication swingApp = getService(bc,CySwingApplication.class);
 		CyServiceRegistrar reg = getService(bc,CyServiceRegistrar.class);
 		
 		LegendController controller = new LegendController(reg);
 		LegendPanel legendPanel = new LegendPanel(reg, controller);
-		controller.setLegendPanel(legendPanel);
-		LegendAction legendAction = new LegendAction(cytoscapeDesktopService,legendPanel);
+		LegendAction legendAction = new LegendAction(swingApp,legendPanel);
 		
 		registerService(bc,legendPanel,CytoPanelComponent.class);
 		registerService(bc,legendAction,CyAction.class);
+		registerAllServices(bc,controller);
+		System.out.println("loading legendCreator!");
 	}
 }
 

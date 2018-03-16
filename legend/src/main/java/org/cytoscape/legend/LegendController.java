@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JCheckBox;
+import javax.swing.JTabbedPane;
 
 import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.application.swing.CytoPanel;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.application.swing.events.CytoPanelComponentSelectedEvent;
 import org.cytoscape.application.swing.events.CytoPanelComponentSelectedListener;
@@ -88,6 +90,7 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 		public void scanNetwork() {
 
 		initialize();
+		candidates.clear();
 		if (network == null) return;
 		
 		// Now we cruise thru the list of node, then edge attributes looking for mappings.  Each mapping may potentially be a legend entry.
@@ -102,7 +105,6 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 	private void findLegendCandidates(VisualStyle style)
 	{
 		Collection<VisualMappingFunction<?, ?>> vizmapFns =  style.getAllVisualMappingFunctions();
-		candidates.clear();
 		for (VisualMappingFunction<?,?> fn : vizmapFns)
 		{
 			String mappingType = fn.toString();
@@ -116,7 +118,7 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 	public void setCurrentNetView(CyNetworkView newView)
 	{
 		if (newView == null) return;		// use ""
-		if (newView.getSUID() == currentNetworkView.getSUID()) return;
+//		if (newView.getSUID() == currentNetworkView.getSUID()) return;
 		currentNetworkView = newView;
 		legendPanel.enableControls(currentNetworkView != null);
 		
@@ -260,15 +262,19 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 				Object val = set.get(s);
 				ShapeType shape = getShapeType(val.toString());
 				
-				if (shape != null && shapeIsUsed(shape, used))
+//				boolean isTypeUsed = searchFor
+				if (shape != null && shapeIsUsed(shape, used))			// && typeIsUsed(s, types)
 				{
 					shapeList.add(shape);
 					objectNames.add(s);
+					System.out.println("using shape: " + shape + " for " + s);
 				}
 			}
 			
 			ShapeType[] shapes = shapeList.toArray(new ShapeType[0]);
 			String[] oNames = objectNames.toArray(new String[0]);
+			System.out.println("using shapes: " + shapes);
+			System.out.println("with names: " + oNames);
 			legend = factory.addShapeLegend(title, x, y, outSize, shapes, oNames);
 		}
 		else if ("Node Fill Color".equals(dispName))
@@ -336,7 +342,6 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 			if (shapeName.equals(displayName))
 				return true;
 		}
-
 		return false;
 	}
 
@@ -490,7 +495,11 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 		{
 			 NodeShape shape = (NodeShape) nodeView.getVisualProperty(BasicVisualLexicon.NODE_SHAPE);
 			 shapeTypeMap.put(shape, nodeView.getModel());
+//			 NodeShape defaultshape = (NodeShape) nodeView.getVisualProperty(BasicVisualLexicon.NODE_SHAPE);
 		}
+//		 shapeTypeMap.put(shape, null);
+
+		 System.out.println("shapes " + shapeTypeMap.size() + "  " + shapeTypeMap.keySet());
 		return shapeTypeMap;
 	}
 	
@@ -503,7 +512,8 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 			 Paint paint = nodeView.getVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR);
 			 fillColorMap.put(paint, nodeView.getModel());
 		}
-		return fillColorMap;
+		 System.out.println("colors " + fillColorMap.size() + "  " + fillColorMap.keySet());
+		 return fillColorMap;
 	}
 	
 	private Map<Paint, CyNode> getUsedBorderColors()
@@ -569,9 +579,10 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 	}
 	@Override
 	public void handleEvent(CytoPanelComponentSelectedEvent arg0) {
-		CytoPanelName panel = arg0.getCytoPanel().getCytoPanelName();
-		String name = arg0.getCytoPanel().getSelectedComponent().getName();
-		System.out.println("ZXXXXXXXFDVSGDF  " + panel.getTitle() + ": " + name);
+		CytoPanel panel = arg0.getCytoPanel();
+		String panelName = panel.getCytoPanelName().getTitle(); 
+		String name = panel.getSelectedComponent().getName();
+		System.out.println(name + ": " + panelName);
 		
 	}
 	
