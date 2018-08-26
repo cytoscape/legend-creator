@@ -136,7 +136,12 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 	public void setTitle(String txt) 		{  	title = txt;}
 	public void setSubtitle(String txt) 		{ 	subtitle = txt; }
 
-	//-------------------------------------------------------------------------------
+	public String getCurrentNetworkName() {
+		if (currentNetworkView != null)
+			return "" + currentNetworkView.getModel().getSUID();		// TODO -- getCurrentNetworkName
+		return "";
+	}
+		//-------------------------------------------------------------------------------
 	public void layout()
 	{
 		for (LegendCandidate candidate : candidates)
@@ -154,7 +159,7 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 		double centerX  = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_CENTER_X_LOCATION);
 		double centerY  = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_CENTER_Y_LOCATION);
 		int X = (int) (centerX - width / 2.0);
-		int Y = (int) (centerY + height / 2.0);
+		int Y = (int) (centerY + height / 2.0) - 400;
 		
 		int startX = X;
 		int startY = Y;
@@ -172,6 +177,7 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 			Map<String,String> strs = LegendFactory.ezMap(textArgs);
 			TextAnnotation textBox = factory.createTextAnnotation(TextAnnotation.class, networkView, strs);
 			textBox.setCanvas("background");
+			textBox.setName(title);
 			annotationMgr.addAnnotation(textBox);
 			Y += LINE_HEIGHT;
 		
@@ -182,6 +188,7 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 			Map<String,String> strs = LegendFactory.ezMap(textArgs);
 			TextAnnotation textBox = factory.createTextAnnotation(TextAnnotation.class, networkView, strs);
 			textBox.setCanvas("background");
+			textBox.setName(subtitle);
 			annotationMgr.addAnnotation(textBox);
 			Y += LINE_HEIGHT;
 		}
@@ -228,6 +235,8 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 			Object[] boxArgs = { "x", startX - HALFSPACE, "y", startY - HALFSPACE , "width", totalWidth, "height", totalHeight,  "shapeType" , "Rectangle"};
 			Map<String,String> strs = LegendFactory.ezMap(boxArgs);
 			ShapeAnnotation lineBox = factory.createShapeAnnotation(ShapeAnnotation.class, networkView, strs);
+			lineBox.setCanvas("background");
+			lineBox.setName("Bounding Box");
 			annotationMgr.addAnnotation(lineBox);
 		}
 //		networkView.refresh();
@@ -275,8 +284,8 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 			
 			ShapeType[] shapes = shapeList.toArray(new ShapeType[0]);
 			String[] oNames = objectNames.toArray(new String[0]);
-			System.out.println("using shapes: " + shapes);
-			System.out.println("with names: " + oNames);
+//			System.out.println("using shapes: " + shapes);
+//			System.out.println("with names: " + oNames);
 			legend = factory.addShapeLegend(title, x, y, outSize, shapes, oNames);
 		}
 		else if ("Node Fill Color".equals(dispName))
@@ -459,19 +468,23 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 		X += layoutVertically ? 0 : legendSize.width + SPACER;  	
 		Y += layoutVertically ? legendSize.height + SPACER : 0;	
 
-		int DEFAULT_WIDTH = 550;	
-		int DEFAULT_HEIGHT = 150;
-		int totalWidth = X - startX;
-		int totalHeight = Y - startY;
-		if (layoutVertically)	totalWidth += DEFAULT_WIDTH + SPACER;
-		else 					totalHeight += DEFAULT_HEIGHT + SPACER;
 		if (borderBox)
 		{
-			Object[] boxArgs = { "x", startX - HALFSPACE, "y", startY - HALFSPACE , "width", totalWidth, "height", totalHeight,  "shapeType" , "Rectangle"};
+			int DEFAULT_WIDTH = 550;	
+			int DEFAULT_HEIGHT = 450;
+			int totalWidth = X - startX;
+			int totalHeight = Y - startY;
+			if (layoutVertically)	totalWidth += DEFAULT_WIDTH + SPACER;
+			else 					totalHeight += DEFAULT_HEIGHT + SPACER ;
+
+			Object[] boxArgs = { "x", startX - HALFSPACE, "y", startY - HALFSPACE , 
+					"width", totalWidth, "height", totalHeight,  "shapeType" , "Rectangle",  "name" , "Border"};
 			Map<String,String> strs = LegendFactory.ezMap(boxArgs);
 			ShapeAnnotation lineBox = factory.createShapeAnnotation(ShapeAnnotation.class, networkView, strs);
+			lineBox.setCanvas("BACKGROUND");
 			annotationMgr.addAnnotation(lineBox);
 		};
+		networkView.updateView();
 		
 		dump();
 	}	
@@ -603,5 +616,5 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 		System.out.println(name + ": " + panelName);
 		
 	}
-	
+
 }

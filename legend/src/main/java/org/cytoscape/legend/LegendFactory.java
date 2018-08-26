@@ -42,7 +42,7 @@ public class LegendFactory {
 	private FontRenderContext fontRenderContext;
 	private CyNetworkView networkView;
 
-		boolean verbose = true;
+		boolean verbose = false;
 		
 	public LegendFactory(CyServiceRegistrar reg, CyNetworkView view)
 	{
@@ -82,8 +82,8 @@ public class LegendFactory {
 		BoundaryRangeValues<Double> rangeY = getFunctionRangeY(continFn);
 		double minimum = range.lesserValue;
 		double maximum = range.greaterValue;
-		double minimumY = range.lesserValue;
-		double maximumY = range.greaterValue;
+//		double minimumY = range.lesserValue;
+//		double maximumY = range.greaterValue;
 		v = prop.getDefault();
 		String title = dispName + ":  " + continFn.getMappingColumnName();
 		if (verbose)
@@ -118,7 +118,7 @@ public class LegendFactory {
 		for (ContinuousMappingPoint<?, ?> pt : list)
 		{
 			Double v = (Double) pt.getValue();
-			BoundaryRangeValues range = pt.getRange();
+//			BoundaryRangeValues range = pt.getRange();
 //			System.out.println(String.format("value:  %3.1f", v));
 //			System.out.println("range: " + range.equalValue);
 			if (v instanceof Double)
@@ -140,7 +140,7 @@ public class LegendFactory {
 		for (ContinuousMappingPoint<?, ?> pt : list)
 		{
 			Double v = (Double) pt.getValue();
-			BoundaryRangeValues range = pt.getRange();
+			BoundaryRangeValues<?> range = pt.getRange();
 //			System.out.println(String.format("range:  %3.1f", v));
 //			System.out.println("range: " + range.equalValue);
 			if (range.equalValue instanceof Double)
@@ -170,12 +170,12 @@ public class LegendFactory {
 		Object pts = continFn.getAllPoints();
 		List<ContinuousMappingPoint<?, ?>> list = (List<ContinuousMappingPoint<?, ?>>) pts;
 		List<Point2D> pointlist = new ArrayList<Point2D>();
-		double minimumY = Double.MAX_VALUE;
-		double maximumY = Double.MIN_VALUE;
+//		double minimumY = Double.MAX_VALUE;
+//		double maximumY = Double.MIN_VALUE;
 		for (ContinuousMappingPoint<?, ?> pt : list)
 		{
 			Double v = (Double) pt.getValue();
-			BoundaryRangeValues range = pt.getRange();
+			BoundaryRangeValues<?> range = pt.getRange();
 			Double y = 0.;
 			if (range.equalValue instanceof Integer)
 				y = 0.0 + (Integer) range.equalValue;
@@ -228,7 +228,7 @@ public class LegendFactory {
 			Map<String,String> strs = ezMap(swatchArgs);
 			ShapeAnnotation lineBox = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, strs);
 			lineBox.setFillColor(colors[i]);
-//			lineBox.setCanvas("background");
+			lineBox.setCanvas("background");
 //			annotationMgr.addAnnotation(lineBox);
 			group.addMember(lineBox);
 //			lineBox.moveAnnotation(new Point2D.Double(MARGIN,yy));
@@ -241,6 +241,7 @@ public class LegendFactory {
 			strs.put("fontStyle", "" + labelFont.getStyle());
 			strs.put("fontSize", "" + labelFont.getSize());
 			TextAnnotation textBox = textFactory.createAnnotation(TextAnnotation.class, networkView, strs);
+			textBox.setCanvas("background");
 			group.addMember(textBox);
 		}
 		annotationMgr.addAnnotation(group);
@@ -531,10 +532,12 @@ public class LegendFactory {
 		trapezoid.setFillColor(color);
 		trapezoid.setBorderColor(Color.DARK_GRAY);
 		trapezoid.setBorderWidth(1);
-	
+		trapezoid.setCanvas("background");
+
 //		trapezoid.setCanvas("background");
 //		annotationMgr.addAnnotation(trapezoid);
 		group.addMember(trapezoid);		
+		group.setCanvas("background");
 		addTicks(x,y,w,h,minx, maxx, group, false);
 		addYTicks(x,y,w,h,miny, maxy, group);
 		return group;
@@ -568,6 +571,7 @@ public class LegendFactory {
 		}
 		int FUDGE = 25;			// offset the ticks to match the text
 		addTicks(x,y+FUDGE,w,h-(2 * FUDGE),min, max, group, true);
+		group.setCanvas("background");
 		return group;
 
 	}
@@ -639,6 +643,7 @@ public class LegendFactory {
 		String[] groupArgs = { "x", "" + x, "y", "" + y,  "width", "" + w,  "height", "" + h};
 		GroupAnnotation group = groupFactory.createAnnotation(GroupAnnotation.class, networkView, ezMap(groupArgs));
 		if (group == null) return null;
+		group.setName(title);
 		group.setCanvas("background");
 		float LINE_HEIGHT = 28;
 		Object[] titleArgs = { "x", x, "y", y-LINE_HEIGHT, "width", w, "height", LINE_HEIGHT, "text", title};
@@ -648,7 +653,10 @@ public class LegendFactory {
 		strs.put("fontSize", "" + FONTSIZE);
 	
 		TextAnnotation titleBox = textFactory.createAnnotation(TextAnnotation.class, networkView, strs);
+		titleBox.setName(title);
+		titleBox.setCanvas("background");
 		group.addMember(titleBox);
+		group.setCanvas("background");
 		return group;
 			
 	}
@@ -661,8 +669,10 @@ public class LegendFactory {
 		borderArgs.put("height", "" + h);
 		borderArgs.put("shapeType", "Rectangle");
 		ShapeAnnotation borderBox = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, borderArgs);
+		borderBox.setCanvas("background");
 		borderBox.moveAnnotation(new Point2D.Double(x,y));
 		group.addMember(borderBox);
+		group.setCanvas("background");
 		return borderBox;
 	}
 	//------------------------------------------------------------------
@@ -694,8 +704,10 @@ public class LegendFactory {
 			tickArgs.put("height", orientVertically ? "1" : "" + TICKWIDTH);
 			tickArgs.put("shapeType", "Rectangle");
 			ticks[t] = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, tickArgs);
+			ticks[t].setName("tick");
 			ticks[t].setFillColor(Color.BLACK);
 			ticks[t].setBorderWidth(BORDERWIDTH);
+			ticks[t].setCanvas("background");
 			group.addMember(ticks[t]);
 	
 			Map<String,String> tickLabels = new HashMap<String,String>();
@@ -713,6 +725,8 @@ public class LegendFactory {
 			tickLabels.put("fontStyle", "" + Font.PLAIN);
 
 			vals[t] = textFactory.createAnnotation(TextAnnotation.class, networkView, tickLabels);
+			vals[t].setCanvas("background");
+			vals[t].setName("label");
 			group.addMember(vals[t]);
 			
 		}
@@ -746,6 +760,8 @@ public class LegendFactory {
 			ticks[t] = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, tickArgs);
 			ticks[t].setFillColor(Color.BLACK);
 			ticks[t].setBorderWidth(BORDERWIDTH);
+			ticks[t].setName("tick");
+			ticks[t].setCanvas("background");
 			group.addMember(ticks[t]);
 	
 			Map<String,String> tickLabels = new HashMap<String,String>();
@@ -763,6 +779,8 @@ public class LegendFactory {
 			tickLabels.put("fontStyle", "" + Font.PLAIN);
 
 			vals[t] = textFactory.createAnnotation(TextAnnotation.class, networkView, tickLabels);
+			vals[t].setName("label");
+			vals[t].setCanvas("background");
 			group.addMember(vals[t]);
 			
 		}

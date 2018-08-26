@@ -2,9 +2,9 @@ package org.cytoscape.legend;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -21,6 +21,7 @@ import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.legend.LegendController.LegendCandidate;
 import org.cytoscape.service.util.CyServiceRegistrar;
+import org.cytoscape.util.swing.LookAndFeelUtil;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.vizmap.VisualMappingFunction;
@@ -37,27 +38,41 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 	public String getTitle() 					{		return "Legend Panel";	}
 	public Icon getIcon() 						{		return null;	}
 
-	JCheckBox 		layoutVertical = new JCheckBox("Lay out Vertically");
-	JCheckBox  		drawBorder = new JCheckBox("Draw Border Box");
-	JLabel curNetNameLabel = new JLabel("no network selected");
+	JCheckBox 		layoutVertical = new JCheckBox("Lay out vertically");
+	JCheckBox  		drawBorder = new JCheckBox("Draw bounding box");
+	JLabel curNetNameLabel = new JLabel("No network selected");
 	JTextField title  = new JTextField();
 	JTextField subtitle  = new JTextField();
 	
 	JButton adder = new JButton("Add Legend");
-	JButton selectAll = new JButton("Select All Annotations");
+	JButton selectAll = new JButton("Select All Annotations");			// DEBUG
 	JButton clearAll = new JButton("Remove All Annotations");
+	JButton tester = new JButton("Test");
 
 	//--------------------------------------------------------------------
 	public LegendPanel(CyServiceRegistrar reg, LegendController ctrl) {
 		controller = ctrl;
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		controller.setLegendPanel(this);
-
+		buildUI(reg);
+		title.setText(controller.getCurrentNetworkName());
+		setVisible(true);
+	}
+	
+	//--------------------------------------------------------------------
+	static Font smallFont = new Font("Serif", 0, 8);
+	private void buildUI(CyServiceRegistrar reg) {
+		
 		JPanel intro = new JPanel();
 		intro.setLayout(new BoxLayout(intro, BoxLayout.PAGE_AXIS));
-		intro.add(line(new JLabel("Legends are drawn as annotations in the background canvas.")));
-		intro.add(line(new JLabel("Use these controls to customize your legend")));
+		JLabel label1 = new JLabel("Legends are drawn as annotations in the background canvas.");
+		JLabel label2 = new JLabel("Use these controls to customize your legend.");
+		intro.add(line(label1));
+		intro.add(line(label2));
+		intro.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
 		add(intro);
+		LookAndFeelUtil.makeSmall(label1);
+		LookAndFeelUtil.makeSmall(label2);
 
 		optionsPanel = new JPanel();
 //		optionsPanel.setAlignmentX(0f);
@@ -90,23 +105,22 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 		add(line(scanner,curNetNameLabel));
 		
 		JLabel titlePrompt = new JLabel("Title");
-		titlePrompt.setPreferredSize(new Dimension(60, 28));
-		title.setMaximumSize(new Dimension(340, 28));
-		title.setPreferredSize(new Dimension(240, 28));
+		titlePrompt.setPreferredSize(new Dimension(50, 28));
+		title.setMaximumSize(new Dimension(640, 28));
+		title.setPreferredSize(new Dimension(640, 28));
 		title.setMinimumSize(new Dimension(240, 28));
+		LookAndFeelUtil.makeSmall(titlePrompt);
 		JLabel subtitlePrompt = new JLabel("Subtitle");
-		subtitlePrompt.setPreferredSize(new Dimension(60, 28));
-//		showDate = new JCheckBox("Include Date");
-		subtitle.setMaximumSize(new Dimension(340, 28));
-		subtitle.setPreferredSize(new Dimension(240, 28));
+		subtitlePrompt.setPreferredSize(new Dimension(50, 28));
+		subtitle.setMaximumSize(new Dimension(640, 28));
+		subtitle.setPreferredSize(new Dimension(640, 28));
 		subtitle.setMinimumSize(new Dimension(240, 28));
+		LookAndFeelUtil.makeSmall(subtitlePrompt);
 
 		add(line(titlePrompt, title));
 		add(line(subtitlePrompt, subtitle));
-//		add(line(showDate));
 		add(optionsPanel);
 		optionsPanel.add(Box.createRigidArea(new Dimension(20, 20)));
-
 		optionsPanel.add(Box.createGlue());
 
 		add(line(layoutVertical));
@@ -118,14 +132,14 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 		adder.addActionListener(layout);
 		add(line(adder));
 
-		JButton tester = new JButton("Test");
+		add(Box.createVerticalGlue());		//-------
+
 		ActionListener test = new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) { controller.testAnnotations();  }
 		};
 		tester.addActionListener(test);
 		add(line(tester));
 
-		add(Box.createVerticalGlue());
 		ActionListener selAll = new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) { controller.selectAllAnnotations();  }
 		};
@@ -138,9 +152,10 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 		clearAll.addActionListener(clrAll);
 		add(line(clearAll));
 
-		setVisible(true);
+		
 	}
-	
+
+	//--------------------------------------------------------------------
 	JComponent[] ctrls = {adder, selectAll, clearAll, title, subtitle};
 	public void enableControls(boolean on)
 	{
@@ -148,10 +163,15 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 			component.setEnabled(on);
 	}
 	
+	//--------------------------------------------------------------------
 	public void setCurrentNetwork()
 	{
 		CyNetworkView view = controller.getNetworkView();
 		curNetNameLabel.setText(view == null ? "no current network" : "" + view.getModel());
+		title.setText(view == null ? "" : "" + view.getModel());
+		if (subtitle.getText().isEmpty())
+			subtitle.setText("Legend");
+		title.setText(view == null ? "" : "" + view.getModel());
 		enableControls(view != null);
 	}
 	//--------------------------------------------------------------------
@@ -162,6 +182,9 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 		controller.setTitle(title.getText());
 		controller.setSubtitle(subtitle.getText());
 	}
+	
+	//--------------------------------------------------------------------
+	// util
 	
 	private JPanel line(JComponent sub)
 	{
@@ -185,7 +208,6 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 		return box;
 	}
 
-	List<JCheckBox> options;
 
 }
 
