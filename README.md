@@ -2,7 +2,7 @@
 Cytoscape 3 App: Legend-creator 
 ================================================
 
-Legends are common tools to annotate a network.  They correspond to mapped attributes.  A mapping is either discrete or continuous.
+Legends are common tools to annotate a network.  Each frame in a legend corresponds to a <i>mapped attribute</i>, meaning that the display of the node or edge varies with data stored in a table.  A mapping is either discrete or continuous.
 
 The primary type of legend is the gradient menu.  Cytoscape has recently adopted the BrewerColor system of color palettes, better matching visualizations generated in R.  
 
