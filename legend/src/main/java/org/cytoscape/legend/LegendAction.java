@@ -21,7 +21,7 @@ public class LegendAction extends AbstractCyAction {
 		setPreferredMenu("Tools");
 
 		desktopApp = desktop;
-		cytoPanelWest = this.desktopApp.getCytoPanel(CytoPanelName.WEST);
+		cytoPanelWest = desktopApp.getCytoPanel(CytoPanelName.WEST);
 		legendPanel = myPanel;
 	}
 	

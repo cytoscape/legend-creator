@@ -23,13 +23,13 @@ public class CyActivator extends AbstractCyActivator {
 		CyServiceRegistrar reg = getService(bc,CyServiceRegistrar.class);
 		
 		LegendController controller = new LegendController(reg);
-		LegendPanel legendPanel = new LegendPanel(reg, controller);
+		LegendPanel legendPanel = new LegendPanel(controller);
 		LegendAction legendAction = new LegendAction(swingApp,legendPanel);
 		
 		registerService(bc,legendPanel,CytoPanelComponent.class);
 		registerService(bc,legendAction,CyAction.class);
 		registerAllServices(bc,controller);
-		System.out.println("loading legendCreator!");
+//		System.out.println("loading legendCreator!");
 	}
 }
 

@@ -352,46 +352,48 @@ public class LegendFactory {
 		if (group == null) return null;
 		addBorderBox(group, x, y,  width, height);
 		
-		int i = 0;
-		for (LineType type : strokes)
+		
+		for (int i = 0; i < strokes.length; i++)			//LineType type : strokes
 		{
 			float xx = MARGIN + (orientVertically ? MARGIN : (i * CELL_WIDTH));
 			float yy = MARGIN + (orientVertically ? (i * CELL_HEIGHT) + 20 : 0);
-			Object[] dotArgs = { "x", x + xx, "y", y + yy,  "width", "2",  "height", "2","shapeType", "Ellipse","fillColor", "0" };
-			ShapeAnnotation src = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, ezMap(dotArgs));
-			src.moveAnnotation(new Point2D.Double(x + xx,y + yy));
-//			src.setCanvas("background");
-//			annotationMgr.addAnnotation(src);
+			Object[] srcArgs = { "x", x + xx, "y", y + yy,  "width", "2",  "height", "2","shapeType", "Ellipse","fillColor", 0 };
+			ShapeAnnotation src = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, ezMap(srcArgs));
+//			src.moveAnnotation(new Point2D.Double(x + xx,y + yy));
+			
+			src.setCanvas("background");
 			group.addMember(src);
+//			annotationMgr.addAnnotation(src);
+			
 			Object[] targArgs = { "x", x + xx + SWATCH_WIDTH, "y", y + yy ,  "width", 2,  "height", 2,"shapeType", "Rectangle","fillColor", 0 };
 			ShapeAnnotation targ = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, ezMap(targArgs));
 			targ.setCanvas("background");
-			annotationMgr.addAnnotation(targ);
 			group.addMember(targ);
+//			annotationMgr.addAnnotation(targ);
 
 			float dx = xx + (orientVertically ? CELL_WIDTH : 0);
 			float dy = yy + (orientVertically ? 0  : CELL_HEIGHT);
 			Object[] textArgs = { "x", x + dx, "y", y + dy - half_dif,  "width", 40,  "height", 20, "fontSize", font.getSize(), "fontFamily", font.getFamily() };
 			
 			TextAnnotation text = textFactory.createAnnotation(TextAnnotation.class, networkView, ezMap(textArgs));
-//			text.setCanvas("background");
-			text.setText(type.getDisplayName());
-//			annotationMgr.addAnnotation(text);
+			text.setCanvas("background");
+			text.setText(names[i]);
 			group.addMember(text);
+//			annotationMgr.addAnnotation(text);
 
-			boolean passArgs = true;
-			String[] arrowArgs = { "lineThickness", "8", "edgeLineStyle", "Dash Dot" };   //, "edgeLineStyle", type.getSerializableString()
-			Map<String, String> argv = passArgs ? ezMap(arrowArgs) : null;
+			Object[] arrowArgs = { "x", x + xx, "y", y + yy, "lineThickness", "8" };   //, "edgeLineStyle", type.getSerializableString()    "width", 40,  "height", 8, "edgeLineStyle", "Dash Dot"
+			Map<String, String> argv = ezMap(arrowArgs);
 			ArrowAnnotation arrow = arrowFactory.createAnnotation(ArrowAnnotation.class, networkView, argv);  //
 			arrow.setSource(src);
 			arrow.setTarget(targ);
-			arrow.setLineWidth(6);
-			arrow.setLineColor(discreteColors[i++]);
+			arrow.setLineWidth(8);
+			arrow.setLineColor(Color.BLACK);		//discreteColors[i]
 			arrow.setAnchorType(ArrowEnd.SOURCE, AnchorType.CENTER);
 			arrow.setAnchorType(ArrowEnd.TARGET, AnchorType.CENTER);
+			arrow.moveAnnotation(new Point2D.Double(x + xx,y + yy));
+			arrow.setCanvas("background");
+			group.addMember(arrow);
 //			annotationMgr.addAnnotation(arrow);
-//			arrow.setCanvas("background");
-			group.addArrow(arrow);
 		}
 		return group;
 	}
@@ -483,22 +485,23 @@ public class LegendFactory {
 				maxx = Math.max(maxx, X);
 				maxy = Math.max(maxy, Y);
 			}
-			for (Point2D pt : pts)
-				System.out.println(String.format("( %3.1f, %3.1f )", pt.getX(),pt.getY())); 	
+//			for (Point2D pt : pts)
+//				System.out.println(String.format("( %3.1f, %3.1f )", pt.getX(),pt.getY())); 	
 			
 			double xRange = ((double) w) / (maxx - minx);
-			double yRange = ((double) h) / (maxy - miny);
-			System.out.println(String.format("X RANGE: ( %3.1f, %3.1f)  %3.1f", minx,maxx, (double) w)); 	
-			System.out.println(String.format("Y RANGE: ( %3.1f, %3.1f) %3.1f", miny,maxy, (double) h)); 	
-			System.out.println(String.format("RANGES: ( %3.1f, %3.1f)", xRange,yRange)); 	
+			double yRange = ((double) h) / (maxy);				// - miny
+//			System.out.println(String.format("X RANGE: ( %3.1f, %3.1f)  %3.1f", minx,maxx, (double) w)); 	
+//			System.out.println(String.format("Y RANGE: ( %3.1f, %3.1f) %3.1f", miny,maxy, (double) h)); 	
+//			System.out.println(String.format("RANGES: ( %3.1f, %3.1f)", xRange,yRange)); 	
 
 			path.moveTo(x, y + h);
+			path.lineTo(x , y + h - pts.get(0).getY() * yRange );
 			for (Point2D pt : pts)
 			{
 				int xPixels = (int)(xRange * (pt.getX() - minx));
-				int yPixels =  (int)(yRange * (pt.getY() - miny));
+				int yPixels =  (int)(yRange * (pt.getY()));			// - miny
 				
-				System.out.println(String.format("( %3.1f, %3.1f = %d, %d)", pt.getX(),pt.getY(), xPixels, yPixels)); 	
+//				System.out.println(String.format("( %3.1f, %3.1f = %d, %d)", pt.getX(),pt.getY(), xPixels, yPixels)); 	
 				path.lineTo(x + xPixels, y + h - yPixels);
 
 			}
@@ -539,7 +542,7 @@ public class LegendFactory {
 		group.addMember(trapezoid);		
 		group.setCanvas("background");
 		addTicks(x,y,w,h,minx, maxx, group, false);
-		addYTicks(x,y,w,h,miny, maxy, group);
+		addYTicks(x,y,w,h,0, miny, maxy, group);
 		return group;
 
 	}	
@@ -554,7 +557,7 @@ public class LegendFactory {
 		if (group == null) return null;
 		addBorderBox(group, x, y, w, h);
 		
-		String[] text = { "smallest", "small", "median", "large", "largest"};
+		String[] text = { "smallest", "small", "medium", "large", "largest"};
 		int[] sizes = {10, 20, 30, 40, 50 };
 		int margin = 18;
 		int lineHeight = h / text.length;
@@ -732,7 +735,7 @@ public class LegendFactory {
 		}
 	}
 
-	private void addYTicks(int x, int y, int w, int h, double min, double max,GroupAnnotation group)
+	private void addYTicks(int x, int y, int w, int h, double zero, double min, double max, GroupAnnotation group)
 	{
 		int TICKS = 2;
 		int TICKWIDTH = 10;
@@ -765,7 +768,7 @@ public class LegendFactory {
 			group.addMember(ticks[t]);
 	
 			Map<String,String> tickLabels = new HashMap<String,String>();
-			double val = min + t * (max - min);
+			double val = min + t * (max - zero);
 			String formattedStr = String.format("%3.0f", val);
 			tickLabels.put("text", "" + formattedStr);
 			int strWidth = getStringWidth(formattedStr, labelFont);

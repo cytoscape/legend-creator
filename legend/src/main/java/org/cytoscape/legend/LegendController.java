@@ -84,6 +84,15 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 		factory = new LegendFactory(registrar, networkView);
 	}
 	//-------------------------------------------------------------------
+	@Override
+	public void handleEvent(CytoPanelComponentSelectedEvent arg0) {
+		CytoPanel panel = arg0.getCytoPanel();
+//		String panelName = panel.getCytoPanelName().getTitle(); 
+//		String name = panel.getSelectedComponent().getName();
+//		System.out.println(name + ": " + panelName);
+		
+	}
+	//-------------------------------------------------------------------
 		public CyNetworkView getNetworkView()		{ 	 return networkView;		}
 		
 		
@@ -134,7 +143,7 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 	public void setDrawBorder(boolean show)	{ 	borderBox = show;	factory.setDrawBorder(show);}
 	
 	public void setTitle(String txt) 		{  	title = txt;}
-	public void setSubtitle(String txt) 		{ 	subtitle = txt; }
+	public void setSubtitle(String txt) 	{ 	subtitle = txt; }
 
 	public String getCurrentNetworkName() {
 		if (currentNetworkView != null)
@@ -240,6 +249,7 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 			annotationMgr.addAnnotation(lineBox);
 		}
 //		networkView.refresh();
+		networkView.fitContent();
 	}
 
 
@@ -606,14 +616,6 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 		    if (a == null) continue;
 		    annotationMgr.removeAnnotation(a);
 		}
-		
-	}
-	@Override
-	public void handleEvent(CytoPanelComponentSelectedEvent arg0) {
-		CytoPanel panel = arg0.getCytoPanel();
-		String panelName = panel.getCytoPanelName().getTitle(); 
-		String name = panel.getSelectedComponent().getName();
-		System.out.println(name + ": " + panelName);
 		
 	}
 

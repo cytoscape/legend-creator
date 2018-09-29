@@ -28,13 +28,24 @@ import org.cytoscape.view.vizmap.VisualMappingFunction;
 
 public class LegendPanel extends JPanel implements CytoPanelComponent {
 	
-	private static final long serialVersionUID = 8292806967891823933L;
+	//--------------------------------------------------------------------
+	public LegendPanel(LegendController ctrl) {
+		controller = ctrl;
+		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+		controller.setLegendPanel(this);
+		buildUI();
+		title.setText(controller.getCurrentNetworkName());
+		setVisible(true);
+	}
+
+	//--------------------------------------------------------------------
+	private static final long serialVersionUID = 12L;
 
 	private LegendController controller;
 	private JPanel optionsPanel;
 	
-	public Component getComponent() 				{		return this;	}
-	public CytoPanelName getCytoPanelName() 		{		return CytoPanelName.WEST;	}
+	public Component getComponent() 			{		return this;	}
+	public CytoPanelName getCytoPanelName() 	{		return CytoPanelName.WEST;	}
 	public String getTitle() 					{		return "Legend Panel";	}
 	public Icon getIcon() 						{		return null;	}
 
@@ -49,19 +60,13 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 	JButton clearAll = new JButton("Remove All Annotations");
 	JButton tester = new JButton("Test");
 
-	//--------------------------------------------------------------------
-	public LegendPanel(CyServiceRegistrar reg, LegendController ctrl) {
-		controller = ctrl;
-		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-		controller.setLegendPanel(this);
-		buildUI(reg);
-		title.setText(controller.getCurrentNetworkName());
-		setVisible(true);
-	}
+	JLabel clickNotice = new JLabel("Click in the canvas to place the legend");
+	
+	public void hideNotice() {	clickNotice.setVisible(false);  }
+	
 	
 	//--------------------------------------------------------------------
-	static Font smallFont = new Font("Serif", 0, 8);
-	private void buildUI(CyServiceRegistrar reg) {
+	private void buildUI() {
 		
 		JPanel intro = new JPanel();
 		intro.setLayout(new BoxLayout(intro, BoxLayout.PAGE_AXIS));
@@ -127,10 +132,16 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 		add(line(drawBorder));
 
 		ActionListener layout = new ActionListener() {
-			@Override public void actionPerformed(ActionEvent e) { controller.layout(); }
+			@Override public void actionPerformed(ActionEvent e) 
+			{
+				clickNotice.setVisible(true);
+				controller.layout(); 
+			}
 		};
 		adder.addActionListener(layout);
 		add(line(adder));
+		add(line(clickNotice));
+		clickNotice.setVisible(false);
 
 		add(Box.createVerticalGlue());		//-------
 
