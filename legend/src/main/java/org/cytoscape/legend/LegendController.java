@@ -11,11 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JCheckBox;
-import javax.swing.JTabbedPane;
 
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CytoPanel;
-import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.application.swing.events.CytoPanelComponentSelectedEvent;
 import org.cytoscape.application.swing.events.CytoPanelComponentSelectedListener;
 import org.cytoscape.model.CyNetwork;
@@ -160,18 +158,75 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 				
 //		int X = 500;			// starting point
 //		int Y = 500;
+		List<CyNode> list = network.getNodeList();
+		double minX=Double.MAX_VALUE, minY=Double.MAX_VALUE;
+		double maxX=Double.MIN_VALUE, maxY=Double.MIN_VALUE;
 		
-		
-		double width = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_WIDTH);
-		double height = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_WIDTH);
+		for (CyNode node : list)
+		{
+			View<CyNode> nodeview = networkView.getNodeView(node);
+			double x = nodeview.getVisualProperty(BasicVisualLexicon.NODE_X_LOCATION);
+			double y = nodeview.getVisualProperty(BasicVisualLexicon.NODE_Y_LOCATION);
+			double w = nodeview.getVisualProperty(BasicVisualLexicon.NODE_WIDTH);
+			double h = nodeview.getVisualProperty(BasicVisualLexicon.NODE_HEIGHT);
 
-		double centerX  = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_CENTER_X_LOCATION);
-		double centerY  = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_CENTER_Y_LOCATION);
-		int X = (int) (centerX - width / 2.0);
-		int Y = (int) (centerY + height / 2.0) - 400;
+			minX = Math.min(minX, x-w/2);
+			minY = Math.min(minY, y-h/2);
+			maxX = Math.max(maxX, x+w/2);
+			maxY = Math.max(maxY, y+h/2);
+		}
+		Object[] args = { "x", minX, "y", minY , "width", maxX-minX, "height", maxY-minY,  "shapeType" , "Rectangle"};
+		Map<String,String> sstrs = LegendFactory.ezMap(args);
+		ShapeAnnotation abox = factory.createShapeAnnotation(ShapeAnnotation.class, networkView, sstrs);
+		abox.setCanvas("background");
+		abox.setName("Bounding Box");
+		abox.setBorderColor(Color.GREEN);
+		abox.setBorderWidth(3);
+		annotationMgr.addAnnotation(abox);
+		int left = (int) minX ;
+		int top = (int) minY;
+		int bottom = (int) maxY;
+		int right = (int) maxX;
+
 		
-		int startX = X;
-		int startY = Y;
+		
+		
+//		
+//		double scale = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_SCALE_FACTOR);
+//		double width = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_WIDTH);
+//		double height = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_WIDTH);
+//		double centerX  = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_CENTER_X_LOCATION);
+//		double centerY  = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_CENTER_Y_LOCATION);
+//		int left = (int) (centerX - (width / 2.0));
+//		int top = (int) (centerY - height  / 2.0);
+//		int bottom = (int) (centerY + height / 2.0);
+//		boolean boxNet = true;  		//DEBUG
+//		if (boxNet)
+//		{
+//			Object[] boxArgs = { "x", left, "y", top , "width", width, "height", height,  "shapeType" , "Rectangle"};
+//			Map<String,String> strs = LegendFactory.ezMap(boxArgs);
+//			ShapeAnnotation box = factory.createShapeAnnotation(ShapeAnnotation.class, networkView, strs);
+//			box.setCanvas("background");
+//			box.setName("Bounding Box");
+//			box.setBorderColor(Color.RED);
+//			box.setBorderWidth(3);
+//			annotationMgr.addAnnotation(box);
+//
+//		
+//			Object[] args = { "x", minX, "y", minY , "width", maxX-minX, "height", maxY-minY,  "shapeType" , "Rectangle"};
+//			Map<String,String> sstrs = LegendFactory.ezMap(args);
+//			ShapeAnnotation abox = factory.createShapeAnnotation(ShapeAnnotation.class, networkView, sstrs);
+//			abox.setCanvas("background");
+//			abox.setName("Bounding Box");
+//			abox.setBorderColor(Color.GREEN);
+//			abox.setBorderWidth(3);
+//			annotationMgr.addAnnotation(abox);
+//	
+//		
+//		}
+		
+		int startX = layoutVertically ? right : left;
+		int startY = layoutVertically ? top : bottom;
 		int DEFAULT_WIDTH = 500;	 
 		int DEFAULT_HEIGHT = 100;
 		int dX = layoutVertically ? 0 : 500;
@@ -182,27 +237,27 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 		
 		if (title.length() > 0)
 		{
-			Object[] textArgs = { "x", X , "y", Y, "width", DEFAULT_WIDTH, "height", LINE_HEIGHT, "text", title,  "fontSize", 24, "fontFamily", "Serif" };
+			Object[] textArgs = { "x", left , "y", bottom, "width", DEFAULT_WIDTH, "height", LINE_HEIGHT, "text", title,  "fontSize", 24, "fontFamily", "Serif" };
 			Map<String,String> strs = LegendFactory.ezMap(textArgs);
 			TextAnnotation textBox = factory.createTextAnnotation(TextAnnotation.class, networkView, strs);
 			textBox.setCanvas("background");
 			textBox.setName(title);
 			annotationMgr.addAnnotation(textBox);
-			Y += LINE_HEIGHT;
+			bottom += LINE_HEIGHT;
 		
 		}
 		if (subtitle.length() > 0)
 		{
-			Object[] textArgs = { "x", X , "y", Y, "width", DEFAULT_WIDTH, "height", LINE_HEIGHT, "text", subtitle,  "fontSize", 14, "fontFamily", "SansSerif" };
+			Object[] textArgs = { "x", left , "y", bottom, "width", DEFAULT_WIDTH, "height", LINE_HEIGHT, "text", subtitle,  "fontSize", 14, "fontFamily", "SansSerif" };
 			Map<String,String> strs = LegendFactory.ezMap(textArgs);
 			TextAnnotation textBox = factory.createTextAnnotation(TextAnnotation.class, networkView, strs);
 			textBox.setCanvas("background");
 			textBox.setName(subtitle);
 			annotationMgr.addAnnotation(textBox);
-			Y += LINE_HEIGHT;
+			bottom += LINE_HEIGHT;
 		}
 		if (title.length() > 0 || subtitle.length() > 0)  
-			Y += LINE_HEIGHT;
+			bottom += LINE_HEIGHT;
 		
 		for (LegendCandidate candidate : candidates)
 		{
@@ -223,20 +278,20 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 			
 			if (mapType.contains("Continuous"))
 			{
-				factory.addContinuousMapLegend((ContinuousMapping<?, ?>) fn, X, Y, size);
+				factory.addContinuousMapLegend((ContinuousMapping<?, ?>) fn, left, bottom, size);
 			}
 			else if (mapType.contains("Discrete"))
 			{
-				addDiscreteMapLegend((DiscreteMapping<?, ?>) fn, X, Y, size);		
+				addDiscreteMapLegend((DiscreteMapping<?, ?>) fn, left, bottom, size);		
 			}
 			if (layoutVertically) 	{  	dX = 0; dY = size.height + SPACER; }		// increment Y
 			else 					{	dY = 0; dX = size.width + SPACER; }		// increment X
 
-			X += dX;
-			Y += dY;
+			left += dX;
+			bottom += dY;
 		}
-		int totalWidth = X - startX;
-		int totalHeight = Y - startY;
+		int totalWidth = (layoutVertically ? left : right) - startX;
+		int totalHeight = (layoutVertically ? bottom : top)  - startY;
 		if (layoutVertically)	totalWidth += DEFAULT_WIDTH + SPACER;
 		else 					totalHeight += DEFAULT_HEIGHT + SPACER;
 		if (borderBox)

@@ -88,6 +88,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.cytoscape</groupId>
+			<artifactId>swing-util-api</artifactId>
+			<version>${cytoscape.api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.cytoscape</groupId>
 			<artifactId>work-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 		</dependency>
