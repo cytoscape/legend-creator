@@ -1,20 +1,18 @@
 package org.cytoscape.legend;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Paint;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.JCheckBox;
 
 import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.application.swing.CytoPanel;
 import org.cytoscape.application.swing.events.CytoPanelComponentSelectedEvent;
 import org.cytoscape.application.swing.events.CytoPanelComponentSelectedListener;
 import org.cytoscape.model.CyNetwork;
@@ -78,18 +76,18 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 //		if (cyApplicationManager != null) return;
 		cyApplicationManager = registrar.getService(CyApplicationManager.class);
 		annotationMgr = registrar.getService(AnnotationManager.class);
+		factory = new LegendFactory(registrar, networkView);
+
 		network = cyApplicationManager.getCurrentNetwork();
 		networkView = cyApplicationManager.getCurrentNetworkView();
-		factory = new LegendFactory(registrar, networkView);
-	}
+}
 	//-------------------------------------------------------------------
 	@Override
-	public void handleEvent(CytoPanelComponentSelectedEvent arg0) {
-		CytoPanel panel = arg0.getCytoPanel();
-//		String panelName = panel.getCytoPanelName().getTitle(); 
-//		String name = panel.getSelectedComponent().getName();
-//		System.out.println(name + ": " + panelName);
-		
+	public void handleEvent(CytoPanelComponentSelectedEvent arg0) 
+	{	
+		Component comp = arg0.getCytoPanel().getSelectedComponent();
+		if (comp instanceof LegendPanel)
+			scanNetwork();
 	}
 	//-------------------------------------------------------------------
 		public CyNetworkView getNetworkView()		{ 	 return networkView;		}
@@ -185,51 +183,59 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 //		int Y = 500;
 		
 		Rectangle2D.Double bounds= bounds();	
-		Object[] args = { "x", bounds.getX(), "y", bounds.getY() , "width", bounds.getWidth(), "height", bounds.getHeight(),  "shapeType" , "Rectangle"};
-		Map<String,String> sstrs = LegendFactory.ezMap(args);
-		ShapeAnnotation abox = factory.createShapeAnnotation(ShapeAnnotation.class, networkView, sstrs);
-		abox.setCanvas("background");
-		abox.setName("Bounding Box");
-		abox.setBorderColor(Color.GREEN);
-		abox.setBorderWidth(3);
-		annotationMgr.addAnnotation(abox);
-		int left = (int) bounds.getX() ;
-		int top = (int) bounds.getY();
-		int right = left + (int) bounds.getWidth();
-		int bottom = top + (int) bounds.getHeight();
-		int startX = layoutVertically ? right : left;
-		int startY = layoutVertically ? top : bottom;
+		boolean showBounds = false;
+		if (showBounds)
+		{
+			Object[] args = { "x", bounds.getX(), "y", bounds.getY() , "width", bounds.getWidth(), "height", bounds.getHeight(),  "shapeType" , "Rectangle"};
+			Map<String,String> sstrs = LegendFactory.ezMap(args);
+			ShapeAnnotation abox = factory.createShapeAnnotation(ShapeAnnotation.class, networkView, sstrs);
+			abox.setCanvas("background");
+			abox.setName("Bounding Box");
+			abox.setBorderColor(Color.GREEN);
+			abox.setBorderWidth(3);
+			annotationMgr.addAnnotation(abox);
+		}
+		
 		int DEFAULT_WIDTH = 500;	 
 		int DEFAULT_HEIGHT = 100;
+		int SPACER = 150;
+		int HALFSPACE = SPACER / 2;
+		int LINE_HEIGHT = 30;
+
+		final int left = (int) bounds.getX() ;
+		final int top = (int) bounds.getY();
+		final int right = left + (int) bounds.getWidth();
+		final int bottom = top + (int) bounds.getHeight();
+		final int startX = layoutVertically ? (right + HALFSPACE + 12) : left;
+		final int startY = layoutVertically ? top : (bottom + HALFSPACE + 12);
+		int x = startX;
+		int y = startY;
 		int dX = layoutVertically ? 0 : 500;
 		int dY = layoutVertically ? 500 : 0;			
-		int SPACER = 150;
-		int LINE_HEIGHT = 30;
-		int HALFSPACE = SPACER / 2;
 		
 		if (title.length() > 0)
 		{
-			Object[] textArgs = { "x", left , "y", bottom, "width", DEFAULT_WIDTH, "height", LINE_HEIGHT, "text", title,  "fontSize", 24, "fontFamily", "Serif" };
+			Object[] textArgs = { "x", x , "y", y, "width", DEFAULT_WIDTH, "height", LINE_HEIGHT, "text", title,  "fontSize", 24, "fontFamily", "Serif" };
 			Map<String,String> strs = LegendFactory.ezMap(textArgs);
 			TextAnnotation textBox = factory.createTextAnnotation(TextAnnotation.class, networkView, strs);
 			textBox.setCanvas("background");
 			textBox.setName(title);
 			annotationMgr.addAnnotation(textBox);
-			bottom += LINE_HEIGHT;
+			y += LINE_HEIGHT;
 		
 		}
 		if (subtitle.length() > 0)
 		{
-			Object[] textArgs = { "x", left , "y", bottom, "width", DEFAULT_WIDTH, "height", LINE_HEIGHT, "text", subtitle,  "fontSize", 14, "fontFamily", "SansSerif" };
+			Object[] textArgs = { "x", x , "y", y, "width", DEFAULT_WIDTH, "height", LINE_HEIGHT, "text", subtitle,  "fontSize", 14, "fontFamily", "SansSerif" };
 			Map<String,String> strs = LegendFactory.ezMap(textArgs);
 			TextAnnotation textBox = factory.createTextAnnotation(TextAnnotation.class, networkView, strs);
 			textBox.setCanvas("background");
 			textBox.setName(subtitle);
 			annotationMgr.addAnnotation(textBox);
-			bottom += LINE_HEIGHT;
+			y += LINE_HEIGHT;
 		}
 		if (title.length() > 0 || subtitle.length() > 0)  
-			bottom += LINE_HEIGHT;
+			y += LINE_HEIGHT;
 		
 		for (LegendCandidate candidate : candidates)
 		{
@@ -245,30 +251,30 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 			if (mapType.contains("Passthrough")) continue;
 			
 			Dimension size= new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT);
-			System.out.println("The attribute " + fn.getMappingColumnName() + " (" + 
+			if (verbose) 
+				System.out.println("The attribute " + fn.getMappingColumnName() + " (" + 
 					type + ") is shown with " + dispName + " with a " + mapType + " function");
 			
 			if (mapType.contains("Continuous"))
-			{
-				factory.addContinuousMapLegend((ContinuousMapping<?, ?>) fn, left, bottom, size);
-			}
+				factory.addContinuousMapLegend((ContinuousMapping<?, ?>) fn, x, y, size);
 			else if (mapType.contains("Discrete"))
-			{
-				addDiscreteMapLegend((DiscreteMapping<?, ?>) fn, left, bottom, size);		
-			}
+				addDiscreteMapLegend((DiscreteMapping<?, ?>) fn, x, y, size);		
+
 			if (layoutVertically) 	{  	dX = 0; dY = size.height + SPACER; }		// increment Y
 			else 					{	dY = 0; dX = size.width + SPACER; }		// increment X
 
-			left += dX;
-			bottom += dY;
+			x += dX;
+			y += dY;
 		}
-		int totalWidth = (layoutVertically ? left : right) - startX;
-		int totalHeight = (layoutVertically ? bottom : top)  - startY;
+		int totalWidth = x - startX;
+		int totalHeight = y  - startY;
 		if (layoutVertically)	totalWidth += DEFAULT_WIDTH + SPACER;
 		else 					totalHeight += DEFAULT_HEIGHT + SPACER;
+		
+		
 		if (borderBox)
 		{
-			Object[] boxArgs = { "x", startX - HALFSPACE, "y", startY - HALFSPACE , "width", totalWidth, "height", totalHeight,  "shapeType" , "Rectangle"};
+			Object[] boxArgs = { "x", startX-HALFSPACE, "y", startY-HALFSPACE , "width", totalWidth, "height", totalHeight,  "shapeType" , "Rectangle"};
 			Map<String,String> strs = LegendFactory.ezMap(boxArgs);
 			ShapeAnnotation lineBox = factory.createShapeAnnotation(ShapeAnnotation.class, networkView, strs);
 			lineBox.setCanvas("background");
@@ -276,7 +282,7 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 			annotationMgr.addAnnotation(lineBox);
 		}
 //		networkView.refresh();
-		networkView.fitContent();
+//		networkView.fitContent();
 	}
 
 
@@ -390,7 +396,15 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 
 	int SHORT_SIDE = 100;
 	int LONG_SIDE = 400;
+	
+	
 	//------------------  LegendCandidate -----------------------------------------------
+	/* 
+	 * A data structure to map functions that the user might want in a legend.
+	 * It has a custom compareTo function so that Node properties will be sorted ahead of Edge properties
+	 */
+	
+	
   class LegendCandidate implements Comparable<LegendCandidate>
   {
 	  VisualMappingFunction<?,?> func;

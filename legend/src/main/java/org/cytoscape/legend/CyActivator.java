@@ -31,15 +31,14 @@ public class CyActivator extends AbstractCyActivator {
 //		System.out.println("loading legendCreator!");
 
 
-
 		LegendTaskFactory myTaskFactory = new LegendTaskFactory();
 		Properties prop = new Properties();  
 		prop.setProperty(ServiceProperties.ENABLE_FOR, "true");
-		prop.setProperty(ServiceProperties.PREFERRED_MENU,"");
-		prop.setProperty(ServiceProperties.MENU_GRAVITY,"0.1");
-		prop.setProperty(ServiceProperties.IN_TOOL_BAR,"false");
-		prop.setProperty(ServiceProperties.TITLE,"Add Legend...");
-		registerService(bc,myTaskFactory,LegendTaskFactory.class, prop);
+		prop.setProperty(ServiceProperties.PREFERRED_MENU, ServiceProperties.NETWORK_ADD_MENU);
+		prop.setProperty(ServiceProperties.MENU_GRAVITY,"4");
+		prop.setProperty(ServiceProperties.TITLE,"Legend...");
+		registerService(bc,myTaskFactory,  LegendTaskFactory.class, prop);
+//		System.out.println("registerService " + "Add Legend...");
 	}
 }
 

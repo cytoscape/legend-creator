@@ -587,7 +587,7 @@ public class LegendFactory {
 		VisualProperty<?> prop = fn.getVisualProperty();
 //		String dispName = prop.getDisplayName();
 		List<ContinuousMappingPoint<?, ?>> list = (List<ContinuousMappingPoint<?, ?>>) pts;
-		int listsize = list.size();
+//		int listsize = list.size();
 		
 
 		Object v = null;
@@ -603,22 +603,33 @@ public class LegendFactory {
 			}
 		}
 		float range = (float) maximum - (float) minimum;
-		Color[] colors = new Color[listsize];
-		float[] stops = new float[listsize];
+		List<Float> stopList = new ArrayList<Float>();
+		List<Color> colorList = new ArrayList<Color>();
 		int i = 0;
+		double prevVal = Double.MIN_VALUE;
 		for (ContinuousMappingPoint<?, ?> pt : list)
 		{
 			BoundaryRangeValues<?> vals = pt.getRange();
-			colors[i] =  (Color) vals.lesserValue;
 			v = pt.getValue();
 			if (v instanceof Double)
 			{
+				if (((Double) v) <= prevVal) continue;
+				colorList.add((Color) vals.lesserValue);
+				prevVal = (Double) pt.getValue();
 				float value = ((Double) pt.getValue()).floatValue();
-				stops[i] = (value - (float) minimum) / range;
+				stopList.add((value - (float) minimum) / range);
 //				System.out.println(String.format("value = %3.2f stop = %3.2f", value, stops[i]));
 			}
-			i++;
 		}
+		int size = stopList.size();
+		float[] stops = new float[size];
+		Color[] colors = new Color[size];
+		for (int j=0; j<size; j++)
+		{
+			stops[j] = stopList.get(j);
+			colors[j] = colorList.get(j);
+		}
+		
 		return addGradientLegend(title, x, y, w, h, minimum, maximum, colors, stops);
 	}
 	
