@@ -3,6 +3,7 @@ package org.cytoscape.legend;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Paint;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -136,6 +137,7 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 	private String title;
 	private String subtitle;
 	private CyNetworkView currentNetworkView;
+	private boolean verbose = false;
 	
 	public void setLayout(boolean vert)		{ 	layoutVertically = vert;	}
 	public void setDrawBorder(boolean show)	{ 	borderBox = show;	factory.setDrawBorder(show);}
@@ -149,15 +151,8 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 		return "";
 	}
 		//-------------------------------------------------------------------------------
-	public void layout()
+	public Rectangle2D.Double bounds()
 	{
-		for (LegendCandidate candidate : candidates)
-			candidate.extract();			
-		if (legendPanel != null)
-			legendPanel.extract();
-				
-//		int X = 500;			// starting point
-//		int Y = 500;
 		List<CyNode> list = network.getNodeList();
 		double minX=Double.MAX_VALUE, minY=Double.MAX_VALUE;
 		double maxX=Double.MIN_VALUE, maxY=Double.MIN_VALUE;
@@ -169,13 +164,28 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 			double y = nodeview.getVisualProperty(BasicVisualLexicon.NODE_Y_LOCATION);
 			double w = nodeview.getVisualProperty(BasicVisualLexicon.NODE_WIDTH);
 			double h = nodeview.getVisualProperty(BasicVisualLexicon.NODE_HEIGHT);
-
+	
 			minX = Math.min(minX, x-w/2);
 			minY = Math.min(minY, y-h/2);
 			maxX = Math.max(maxX, x+w/2);
 			maxY = Math.max(maxY, y+h/2);
 		}
-		Object[] args = { "x", minX, "y", minY , "width", maxX-minX, "height", maxY-minY,  "shapeType" , "Rectangle"};
+		return new Rectangle2D.Double(minX, minY,maxX-minX, maxY-minY);
+	}
+	
+//-------------------------------------------------------------------------------
+	public void layout()
+	{
+		for (LegendCandidate candidate : candidates)
+			candidate.extract();			
+		if (legendPanel != null)
+			legendPanel.extract();
+				
+//		int X = 500;			// starting point
+//		int Y = 500;
+		
+		Rectangle2D.Double bounds= bounds();	
+		Object[] args = { "x", bounds.getX(), "y", bounds.getY() , "width", bounds.getWidth(), "height", bounds.getHeight(),  "shapeType" , "Rectangle"};
 		Map<String,String> sstrs = LegendFactory.ezMap(args);
 		ShapeAnnotation abox = factory.createShapeAnnotation(ShapeAnnotation.class, networkView, sstrs);
 		abox.setCanvas("background");
@@ -183,48 +193,10 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 		abox.setBorderColor(Color.GREEN);
 		abox.setBorderWidth(3);
 		annotationMgr.addAnnotation(abox);
-		int left = (int) minX ;
-		int top = (int) minY;
-		int bottom = (int) maxY;
-		int right = (int) maxX;
-
-		
-		
-		
-//		
-//		double scale = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_SCALE_FACTOR);
-//		double width = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_WIDTH);
-//		double height = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_WIDTH);
-//		double centerX  = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_CENTER_X_LOCATION);
-//		double centerY  = networkView.getVisualProperty(BasicVisualLexicon.NETWORK_CENTER_Y_LOCATION);
-//		int left = (int) (centerX - (width / 2.0));
-//		int top = (int) (centerY - height  / 2.0);
-//		int bottom = (int) (centerY + height / 2.0);
-//		boolean boxNet = true;  		//DEBUG
-//		if (boxNet)
-//		{
-//			Object[] boxArgs = { "x", left, "y", top , "width", width, "height", height,  "shapeType" , "Rectangle"};
-//			Map<String,String> strs = LegendFactory.ezMap(boxArgs);
-//			ShapeAnnotation box = factory.createShapeAnnotation(ShapeAnnotation.class, networkView, strs);
-//			box.setCanvas("background");
-//			box.setName("Bounding Box");
-//			box.setBorderColor(Color.RED);
-//			box.setBorderWidth(3);
-//			annotationMgr.addAnnotation(box);
-//
-//		
-//			Object[] args = { "x", minX, "y", minY , "width", maxX-minX, "height", maxY-minY,  "shapeType" , "Rectangle"};
-//			Map<String,String> sstrs = LegendFactory.ezMap(args);
-//			ShapeAnnotation abox = factory.createShapeAnnotation(ShapeAnnotation.class, networkView, sstrs);
-//			abox.setCanvas("background");
-//			abox.setName("Bounding Box");
-//			abox.setBorderColor(Color.GREEN);
-//			abox.setBorderWidth(3);
-//			annotationMgr.addAnnotation(abox);
-//	
-//		
-//		}
-		
+		int left = (int) bounds.getX() ;
+		int top = (int) bounds.getY();
+		int right = left + (int) bounds.getWidth();
+		int bottom = top + (int) bounds.getHeight();
 		int startX = layoutVertically ? right : left;
 		int startY = layoutVertically ? top : bottom;
 		int DEFAULT_WIDTH = 500;	 
@@ -318,15 +290,11 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 
 	private void addDiscreteMapLegend(DiscreteMapping<?, ?> fn, int x, int y, Dimension outSize) 
 	{
-//		boolean orientVertically = false;
-//		int width = orientVertically ? SHORT_SIDE : LONG_SIDE;
-//		int height = orientVertically ? LONG_SIDE : SHORT_SIDE;
 		VisualProperty<?> prop = fn.getVisualProperty();
 		String dispName = prop.getDisplayName();
 		GroupAnnotation legend = null;
 		String columnName = fn.getMappingColumnName();
-//		List<String> values = getAllValues(columnName);
-		Map<NodeShape, CyNode> used = getUsedShapes();
+		Map<NodeShape, CyNode> used = ModelUtil.getUsedShapes(networkView);
 		if ("Node Shape".equals(dispName))
 		{
 			List<String> objectNames = new ArrayList<String>();
@@ -338,12 +306,11 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 				Object val = set.get(s);
 				ShapeType shape = getShapeType(val.toString());
 				
-//				boolean isTypeUsed = searchFor
 				if (shape != null && shapeIsUsed(shape, used))			// && typeIsUsed(s, types)
 				{
 					shapeList.add(shape);
 					objectNames.add(s);
-					System.out.println("using shape: " + shape + " for " + s);
+					if (verbose ) System.out.println("using shape: " + shape + " for " + s);
 				}
 			}
 			
@@ -459,7 +426,26 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 		return colName.compareTo(otherName);
 	}
   }
-//-----------------------  TEST  -------------------------------------------
+
+  //	temporary actions to clear out the annotations during development
+	public void selectAllAnnotations() {
+		List<Annotation> annos = annotationMgr.getAnnotations(networkView);
+		for (Annotation an : annos)
+			an.setSelected(true);
+	}
+
+	public void clearAnnotations() {
+		if (annotationMgr == null || networkView == null)
+			System.err.println("annotationMgr:  " + annotationMgr + "  networkView: " + networkView);
+		else for (Annotation a: annotationMgr.getAnnotations(networkView)) {
+		    if (a == null) continue;
+		    annotationMgr.removeAnnotation(a);
+		}
+		
+	}
+
+  
+  //-----------------------  TEST  -------------------------------------------
 	String[] names= { "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf", "Hotel" };
 	Color[] discreteColors = { Color.BLACK, Color.BLUE, Color.RED, Color.GREEN, Color.CYAN, Color.GRAY, Color.MAGENTA, Color.YELLOW };
 	float[] stops = {0.0f, 0.5f, 1.0f};
@@ -551,7 +537,7 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 		};
 		networkView.updateView();
 		
-		dump();
+		ModelUtil.dump(networkView);
 	}	
 
 	  static LineType getCyNodeLineType(final String displayName) {
@@ -564,114 +550,4 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 	    return null;
 	  }
 	
-	//-------------------------------------------------------------------
-	  
-	  boolean verbose = true;
-		private Map<NodeShape, CyNode> getUsedShapes()
-		{
-			Map<NodeShape, CyNode> shapeTypeMap = new HashMap<NodeShape, CyNode>();
-			Collection<View<CyNode>> nodeViews = networkView.getNodeViews();
-			for (View<CyNode> nodeView : nodeViews)
-			{
-				 NodeShape shape = (NodeShape) nodeView.getVisualProperty(BasicVisualLexicon.NODE_SHAPE);
-				 shapeTypeMap.put(shape, nodeView.getModel());
-//				 NodeShape defaultshape = (NodeShape) nodeView.getVisualProperty(BasicVisualLexicon.NODE_SHAPE);
-			}
-//			 shapeTypeMap.put(shape, null);
-
-			 System.out.println("shapes " + shapeTypeMap.size() + "  " + shapeTypeMap.keySet());
-			return shapeTypeMap;
-		}
-		private Map<NodeShape, CyNode> getAllValues(String column)
-		{
-			Map<NodeShape, CyNode> shapeTypeMap = new HashMap<NodeShape, CyNode>();
-			Collection<View<CyNode>> nodeViews = networkView.getNodeViews();
-			for (View<CyNode> nodeView : nodeViews)
-			{
-				 NodeShape shape = (NodeShape) nodeView.getVisualProperty(BasicVisualLexicon.NODE_SHAPE);
-				 
-				 shapeTypeMap.put(shape, nodeView.getModel());
-//				 NodeShape defaultshape = (NodeShape) nodeView.getVisualProperty(BasicVisualLexicon.NODE_SHAPE);
-			}
-//			 shapeTypeMap.put(shape, null);
-
-			 System.out.println("shapes " + shapeTypeMap.size() + "  " + shapeTypeMap.keySet());
-			return shapeTypeMap;
-		}
-	
-	private Map<Paint, CyNode> getUsedFillColors()
-	{
-		Map<Paint, CyNode> fillColorMap = new HashMap<Paint, CyNode>();
-		Collection<View<CyNode>> nodeViews = networkView.getNodeViews();
-		for (View<CyNode> nodeView : nodeViews)
-		{
-			 Paint paint = nodeView.getVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR);
-			 fillColorMap.put(paint, nodeView.getModel());
-		}
-		 System.out.println("colors " + fillColorMap.size() + "  " + fillColorMap.keySet());
-		 return fillColorMap;
-	}
-	
-	private Map<Paint, CyNode> getUsedBorderColors()
-	{
-		Map<Paint, CyNode> borderColorMap = new HashMap<Paint, CyNode>();
-		Collection<View<CyNode>> nodeViews = networkView.getNodeViews();
-		for (View<CyNode> nodeView : nodeViews)
-		{
-			 Paint paint = nodeView.getVisualProperty(BasicVisualLexicon.NODE_BORDER_PAINT);
-			 borderColorMap.put(paint, nodeView.getModel());
-		}
-		return borderColorMap;
-	}
-	private Map<Paint, CyNode> getUsedEdgeColors()
-	{
-		Map<Paint, CyNode> edgeColorMap = new HashMap<Paint, CyNode>();
-		List<CyNode> nodes = network.getNodeList();
-		for (CyNode node : nodes)
-		{
-			 View<CyNode> nodeView = networkView.getNodeView(node);
-			 Paint paint = nodeView.getVisualProperty(BasicVisualLexicon.EDGE_PAINT);
-			 edgeColorMap.put(paint, node);
-		}
-		return edgeColorMap;
-	}
-	
-	private Map<LineType, CyNode> getUsedLineTypes()
-	{
-		Map<LineType, CyNode> lineTypeMap = new HashMap<LineType, CyNode>();
-		List<CyNode> nodes = network.getNodeList();
-		for (CyNode node : nodes)
-		{
-			 View<CyNode> nodeView = networkView.getNodeView(node);
-			 LineType type = nodeView.getVisualProperty(BasicVisualLexicon.EDGE_LINE_TYPE);
-			 lineTypeMap.put(type, node);
-		}
-		return lineTypeMap;
-	}
-	
-	
-	private void dump() {
-		if (!verbose) return;
-
-		System.out.println("\n\nThere are " + getUsedFillColors().size() + " fill colors and " + getUsedBorderColors().size() + " border colors used.");
-		System.out.println("\n\nThere are " + getUsedShapes().size() + " shapes used.");
-		System.out.println("There are " + getUsedEdgeColors().size() + " edge colors and " + getUsedLineTypes().size() + " line types used.");
-	}
-	
-	public void selectAllAnnotations() {
-		List<Annotation> annos = annotationMgr.getAnnotations(networkView);
-		for (Annotation an : annos)
-			an.setSelected(true);
-	}
-
-	public void clearAnnotations() {
-		if (annotationMgr == null || networkView == null)
-			System.err.println("annotationMgr:  " + annotationMgr + "  networkView: " + networkView);
-		else for (Annotation a: annotationMgr.getAnnotations(networkView)) {
-		    if (a == null) continue;
-		    annotationMgr.removeAnnotation(a);
-		}
-		
-	}
-
 }

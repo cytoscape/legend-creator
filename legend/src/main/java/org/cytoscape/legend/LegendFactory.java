@@ -807,7 +807,7 @@ public class LegendFactory {
 		return new Dimension(w,h);
 	}
 	//------------------  UTILITY -----------------------------------------------
-		static Map<String,String> ezMap(Object[] elems) {
+	public	static Map<String,String> ezMap(Object[] elems) {
 		    final Map<String,String> map = new HashMap<String,String>();
 		    for (int i = 0; i < elems.length-1; i += 2) 
 		      map.put(elems[i].toString(), elems[i+1].toString());
