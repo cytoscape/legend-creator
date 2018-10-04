@@ -10,20 +10,14 @@ import org.cytoscape.work.TaskIterator;
 public class LegendTaskFactory extends AbstractTaskFactory implements NetworkViewLocationTaskFactory{
 
 	@Override
-	public TaskIterator createTaskIterator() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public TaskIterator createTaskIterator() {		return null;	}
 
 	@Override
 	public TaskIterator createTaskIterator(CyNetworkView networkView, Point2D javaPt, Point2D xformPt) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public boolean isReady(CyNetworkView networkView, Point2D javaPt, Point2D xformPt) {
-		return true;
-	}
+	public boolean isReady(CyNetworkView networkView, Point2D javaPt, Point2D xformPt) {		return true;	}
 
 }

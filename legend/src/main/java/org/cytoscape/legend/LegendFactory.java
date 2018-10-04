@@ -359,17 +359,13 @@ public class LegendFactory {
 			float yy = MARGIN + (orientVertically ? (i * CELL_HEIGHT) + 20 : 0);
 			Object[] srcArgs = { "x", x + xx, "y", y + yy,  "width", "2",  "height", "2","shapeType", "Ellipse","fillColor", 0 };
 			ShapeAnnotation src = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, ezMap(srcArgs));
-//			src.moveAnnotation(new Point2D.Double(x + xx,y + yy));
-			
 			src.setCanvas("background");
 			group.addMember(src);
-//			annotationMgr.addAnnotation(src);
 			
 			Object[] targArgs = { "x", x + xx + SWATCH_WIDTH, "y", y + yy ,  "width", 2,  "height", 2,"shapeType", "Rectangle","fillColor", 0 };
 			ShapeAnnotation targ = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, ezMap(targArgs));
 			targ.setCanvas("background");
 			group.addMember(targ);
-//			annotationMgr.addAnnotation(targ);
 
 			float dx = xx + (orientVertically ? CELL_WIDTH : 0);
 			float dy = yy + (orientVertically ? 0  : CELL_HEIGHT);
@@ -379,9 +375,8 @@ public class LegendFactory {
 			text.setCanvas("background");
 			text.setText(names[i]);
 			group.addMember(text);
-//			annotationMgr.addAnnotation(text);
 
-			Object[] arrowArgs = { "x", x + xx, "y", y + yy, "lineThickness", "8" };   //, "edgeLineStyle", type.getSerializableString()    "width", 40,  "height", 8, "edgeLineStyle", "Dash Dot"
+			Object[] arrowArgs = { "lineThickness", "8" };   //, "x", x + xx, "y", y + yy, "edgeLineStyle", type.getSerializableString()    "width", 40,  "height", 8, "edgeLineStyle", "Dash Dot"
 			Map<String, String> argv = ezMap(arrowArgs);
 			ArrowAnnotation arrow = arrowFactory.createAnnotation(ArrowAnnotation.class, networkView, argv);  //
 			arrow.setSource(src);
@@ -390,10 +385,8 @@ public class LegendFactory {
 			arrow.setLineColor(Color.BLACK);		//discreteColors[i]
 			arrow.setAnchorType(ArrowEnd.SOURCE, AnchorType.CENTER);
 			arrow.setAnchorType(ArrowEnd.TARGET, AnchorType.CENTER);
-			arrow.moveAnnotation(new Point2D.Double(x + xx,y + yy));
 			arrow.setCanvas("background");
 			group.addMember(arrow);
-//			annotationMgr.addAnnotation(arrow);
 		}
 		return group;
 	}
