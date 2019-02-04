@@ -473,16 +473,19 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 	ShapeType[] shapes = { ShapeType.RECTANGLE, ShapeType.ELLIPSE, ShapeType.TRIANGLE, ShapeType.PENTAGON, ShapeType.HEXAGON };
 	String[] shapenames= { "Ligand", "Kinase", "Promoter", "RNA", "Antigen" };
 
+	int X = 200;			// starting point
+	int Y = layoutVertically ? 500 : 0;
+	int SPACER = 120;
+	int HALFSPACE = SPACER / 2;
+
 	public void testAnnotations() 
 	{	
 		initialize();
+		X = 200;			// starting point
+		Y = layoutVertically ? 500 : 0;
 		if (legendPanel != null)
 			legendPanel.extract();
 		
-		int X = 200;			// starting point
-		int Y = layoutVertically ? 500 : 0;
-		int SPACER = 120;
-		int HALFSPACE = SPACER / 2;
 		int startX = X - SPACER;
 		int startY = Y - SPACER;
 		int W = 500;
@@ -492,46 +495,37 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 
 		GroupAnnotation gradientLegend = factory.addGradientLegend("Fill Color: layout.degree ",  X, Y, W, H, -2, 3, colors, stops);
 		annotationMgr.addAnnotation(gradientLegend);
-		X += layoutVertically ? 0 : W + SPACER;  	
-		Y += layoutVertically ? H + SPACER : 0;	
+		advance(W,H);
 		
 		Dimension legendSize = new Dimension( 200, 500);
 		GroupAnnotation discreteLegend = factory.addDiscreteColorLegend("Fill Color: Type", X, Y, legendSize, discreteColors, names);
 		annotationMgr.addAnnotation(discreteLegend);
-		X += layoutVertically ? 0 : legendSize.width + SPACER;  	
-		Y += layoutVertically ? legendSize.height + SPACER : 0;	
-
+		advance(legendSize);
+	
 		W = 500;
 		H = 200;
 		GroupAnnotation continuousLegend = factory.addTrapezoidLegend("Node Size: Expression", X, Y, W, H, null, Color.LIGHT_GRAY);
 		annotationMgr.addAnnotation(continuousLegend);
-		X += layoutVertically ? 0 : W + SPACER;  	
-		Y += layoutVertically ? H + SPACER : 0;	
+		advance(W,H);
 	
-		W = 300;
-		H = 300;
 		legendSize = new Dimension( 300, 300);
 		GroupAnnotation linetypeLegend = factory.addLinetypeLegend("Line Type: Function", X, Y, legendSize, LINETYPES, LINETYPE_NAMES);
 		annotationMgr.addAnnotation(linetypeLegend);
-		X += layoutVertically ? 0 : legendSize.width + SPACER;  	
-		Y += layoutVertically ? legendSize.height + SPACER : 0;	
+		advance(legendSize);
 
 		legendSize = new Dimension( 300, 500);
 		GroupAnnotation arrowLegend =  factory.addArrowheadLegend("Arrowhead: Interaction Type", X, Y, legendSize, arrowNames, arrowheads);
 		annotationMgr.addAnnotation(arrowLegend);
-		X += layoutVertically ? 0 : legendSize.width + SPACER;  	
-		Y += layoutVertically ? legendSize.height + SPACER : 0;	
+		advance(legendSize);
 
 		legendSize = new Dimension( 200, 500);
 		GroupAnnotation shapeLegend = factory.addShapeLegend("Node Shape: Protein Type ", X, Y, legendSize, shapes, shapenames);
 		annotationMgr.addAnnotation(shapeLegend);
-		X += layoutVertically ? 0 : legendSize.width + SPACER;  	
-		Y += layoutVertically ? legendSize.height + SPACER : 0;	
+		advance(legendSize);
 
 		GroupAnnotation fontSizeLegend =  factory.addFontSizeLegend("Font Size: degree", X, Y, legendSize, 10, 50, Color.cyan);
 		annotationMgr.addAnnotation(fontSizeLegend);
-		X += layoutVertically ? 0 : legendSize.width + SPACER;  	
-		Y += layoutVertically ? legendSize.height + SPACER : 0;	
+		advance(legendSize);
 
 		if (borderBox)
 		{
@@ -554,7 +548,13 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 		ModelUtil.dump(networkView);
 	}	
 
-	  static LineType getCyNodeLineType(final String displayName) {
+	  private void advance(Dimension dim) {		  advance(dim.width, dim.height);		}
+	  private void advance(int w, int h) {
+			X += layoutVertically ? 0 : w + SPACER;  	
+			Y += layoutVertically ? h + SPACER : 0;	
+	}
+	  
+	static LineType getCyNodeLineType(final String displayName) {
 	    for (final LineType lineType : ((DiscreteRange<LineType>) BasicVisualLexicon.NODE_BORDER_LINE_TYPE.getRange()).values()) {
 	      final String lineTypeName = lineType.getDisplayName();
 	      if (displayName.equals(lineTypeName)) {

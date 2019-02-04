@@ -389,9 +389,9 @@ public class LegendFactory {
 			arrow.setLineWidth(8);
 			arrow.setLineColor(Color.BLACK);		//discreteColors[i]
 			arrow.setAnchorType(ArrowEnd.SOURCE, AnchorType.CENTER);
-			arrow.setAnchorType(ArrowEnd.TARGET, AnchorType.CENTER);
+//			arrow.setAnchorType(ArrowEnd.TARGET, AnchorType.CENTER);
 			arrow.moveAnnotation(new Point2D.Double(x + xx,y + yy));
-			arrow.setCanvas("background");
+			arrow.setCanvas("foreground");
 			group.addMember(arrow);
 //			annotationMgr.addAnnotation(arrow);
 		}
@@ -447,7 +447,7 @@ public class LegendFactory {
 			group.addMember(text);
 
 			boolean passArgs = true;
-			Object[] arrowArgs = { "lineThickness", "8", "edgeLineStyle", "Dots" };   //, "edgeLineStyle", type.getSerializableString()
+			Object[] arrowArgs = { "lineThickness", "8", "edgeLineStyle", "Solid" };   //, "edgeLineStyle", type.getSerializableString()
 			Map<String, String> argv = passArgs ? ezMap(arrowArgs) : null;
 			ArrowAnnotation arrow = arrowFactory.createAnnotation(ArrowAnnotation.class, networkView, argv);  //
 			arrow.setSource(src);
@@ -590,43 +590,41 @@ public class LegendFactory {
 //		int listsize = list.size();
 		
 
-		Object v = null;
+		double v = 0;
 		double minimum = 1000000;
 		double maximum = -1000000;
 		for (ContinuousMappingPoint<?, ?> pt : list)
 		{
-			v = pt.getValue();
-			if (v instanceof Double)
-			{
-				minimum = Math.min(minimum, (Double) v);
-				maximum = Math.max(maximum, (Double) v);
-			}
+			v = (double) pt.getValue();
+			minimum = Math.min(minimum, (Double) v);
+			maximum = Math.max(maximum, (Double) v);
 		}
-		float range = (float) maximum - (float) minimum;
-		List<Float> stopList = new ArrayList<Float>();
+		double range = maximum - minimum;
+		List<Double> stopList = new ArrayList<Double>();
 		List<Color> colorList = new ArrayList<Color>();
 		int i = 0;
 		double prevVal = Double.MIN_VALUE;
 		for (ContinuousMappingPoint<?, ?> pt : list)
 		{
 			BoundaryRangeValues<?> vals = pt.getRange();
-			v = pt.getValue();
-			if (v instanceof Double)
-			{
-				if (((Double) v) <= prevVal) continue;
-				colorList.add((Color) vals.lesserValue);
-				prevVal = (Double) pt.getValue();
-				float value = ((Double) pt.getValue()).floatValue();
-				stopList.add((value - (float) minimum) / range);
+			v = (double) pt.getValue();
+			colorList.add((Color) vals.lesserValue);
+			stopList.add((v - minimum) / range);
+
+//			if (v instanceof Double)
+//			{
+//				if (((Double) v) <= prevVal) continue;
+//				prevVal = (Double) pt.getValue();
+//				float value = ((Double) pt.getValue()).floatValue();
 //				System.out.println(String.format("value = %3.2f stop = %3.2f", value, stops[i]));
-			}
+//			}
 		}
 		int size = stopList.size();
 		float[] stops = new float[size];
 		Color[] colors = new Color[size];
 		for (int j=0; j<size; j++)
 		{
-			stops[j] = stopList.get(j);
+			stops[j] = stopList.get(j).floatValue();
 			colors[j] = colorList.get(j);
 		}
 		
@@ -639,6 +637,8 @@ public class LegendFactory {
 		if (group == null) return null;
 		ShapeAnnotation gradientBox = addBorderBox(group, x, y, w, h);
 
+		for (Color c : colors)
+			System.out.println(c.toString());
 		Point2D start = new Point2D.Float(0, 0);
 		Point2D end = new Point2D.Float(1f,0);
 		LinearGradientPaint p = new LinearGradientPaint(start, end, stops, colors);		
