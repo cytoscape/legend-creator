@@ -115,6 +115,8 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 		{
 			String mappingType = fn.toString();
 			if (mappingType.contains("Passthrough")) continue;
+			VisualProperty<?> vp = fn.getVisualProperty();
+			if (vp.toString().contains("EDGE")) continue;
 			candidates.add(new LegendCandidate(fn));
 		}
 		Collections.sort(candidates);
@@ -349,33 +351,33 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 			String[] oNames = objectNames.toArray(new String[0]);
 			legend = factory.addDiscreteColorLegend(dispName, x, y, outSize, colors, oNames);
 		}
-		else if ("Edge Line Type".equals(dispName))
-		{
-			List<String> objectNames = new ArrayList<String>();
-			List<LineType> types = new ArrayList<LineType>();
-			Map<?,?> set = fn.getAll();
-			for (Object key : set.keySet())
-			{
-				String s = key.toString();
-				Object val = set.get(s);
-				if (val instanceof LineType)
-				{
-					LineType type = (LineType) val;
-					if (type != null)
-					{
-						types.add(type);
-						objectNames.add(s);
-					}
-				}
-			}
-			LineType[] linetypes = types.toArray(new LineType[0]);
-			String[] oNames = objectNames.toArray(new String[0]);
-			legend = factory.addLinetypeLegend(dispName, x, y, outSize, linetypes, oNames);
-		}
-		else if ("Target Arrow".equals(dispName))
-		{
-			legend = factory.addArrowheadLegend(dispName, x, y, outSize, arrowheads, arrowNames);
-		}
+//		else if ("Edge Line Type".equals(dispName))
+//		{
+//			List<String> objectNames = new ArrayList<String>();
+//			List<LineType> types = new ArrayList<LineType>();
+//			Map<?,?> set = fn.getAll();
+//			for (Object key : set.keySet())
+//			{
+//				String s = key.toString();
+//				Object val = set.get(s);
+//				if (val instanceof LineType)
+//				{
+//					LineType type = (LineType) val;
+//					if (type != null)
+//					{
+//						types.add(type);
+//						objectNames.add(s);
+//					}
+//				}
+//			}
+//			LineType[] linetypes = types.toArray(new LineType[0]);
+//			String[] oNames = objectNames.toArray(new String[0]);
+//			legend = factory.addLinetypeLegend(dispName, x, y, outSize, linetypes, oNames);
+//		}
+//		else if ("Target Arrow".equals(dispName))
+//		{
+//			legend = factory.addArrowheadLegend(dispName, x, y, outSize, arrowheads, arrowNames);
+//		}
 		outSize.width += factory.getRightMargin();
 		
 		if (legend != null)
@@ -421,7 +423,7 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 	  public void setCheckBox(JCheckBox ck)	  	{	checkBox = ck;  }
 	  public JCheckBox getCheckBox()	  			{	return checkBox;  }
 	  public void extract()	  					{	if (checkBox != null) 	visible = checkBox.isSelected();  }
-	  boolean isVisible()						{ 	return visible;	}
+	  boolean isVisible()						{ 	return checkBox != null ;	}
 	  
 	@Override public int compareTo(LegendCandidate o) {
 	
@@ -504,19 +506,19 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 	
 		W = 500;
 		H = 200;
-		GroupAnnotation continuousLegend = factory.addTrapezoidLegend("Node Size: Expression", X, Y, W, H, null, Color.LIGHT_GRAY);
+		GroupAnnotation continuousLegend = factory.addRampLegend("Node Size: Expression", X, Y, W, H, null, Color.LIGHT_GRAY);
 		annotationMgr.addAnnotation(continuousLegend);
 		advance(W,H);
 	
-		legendSize = new Dimension( 300, 300);
-		GroupAnnotation linetypeLegend = factory.addLinetypeLegend("Line Type: Function", X, Y, legendSize, LINETYPES, LINETYPE_NAMES);
-		annotationMgr.addAnnotation(linetypeLegend);
-		advance(legendSize);
-
-		legendSize = new Dimension( 300, 500);
-		GroupAnnotation arrowLegend =  factory.addArrowheadLegend("Arrowhead: Interaction Type", X, Y, legendSize, arrowNames, arrowheads);
-		annotationMgr.addAnnotation(arrowLegend);
-		advance(legendSize);
+//		legendSize = new Dimension( 300, 300);
+//		GroupAnnotation linetypeLegend = factory.addLinetypeLegend("Line Type: Function", X, Y, legendSize, LINETYPES, LINETYPE_NAMES);
+//		annotationMgr.addAnnotation(linetypeLegend);
+//		advance(legendSize);
+//
+//		legendSize = new Dimension( 300, 500);
+//		GroupAnnotation arrowLegend =  factory.addArrowheadLegend("Arrowhead: Interaction Type", X, Y, legendSize, arrowNames, arrowheads);
+//		annotationMgr.addAnnotation(arrowLegend);
+//		advance(legendSize);
 
 		legendSize = new Dimension( 200, 500);
 		GroupAnnotation shapeLegend = factory.addShapeLegend("Node Shape: Protein Type ", X, Y, legendSize, shapes, shapenames);

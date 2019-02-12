@@ -36,7 +36,7 @@ public class LegendFactory {
 	private AnnotationFactory<ShapeAnnotation> shapeFactory;
 	private AnnotationFactory<TextAnnotation> textFactory;
 	private AnnotationFactory<GroupAnnotation> groupFactory;
-	private AnnotationFactory<ArrowAnnotation> arrowFactory;
+//	private AnnotationFactory<ArrowAnnotation> arrowFactory;
 	private AnnotationManager annotationMgr;
 	private CyServiceRegistrar registrar;
 	private FontRenderContext fontRenderContext;
@@ -54,9 +54,9 @@ public class LegendFactory {
 		shapeFactory =  (AnnotationFactory<ShapeAnnotation>)registrar.getService( AnnotationFactory.class,"(type=ShapeAnnotation.class)");
 		if (shapeFactory == null) 
 			System.err.println("shapeFactory is null");
-		arrowFactory =  (AnnotationFactory<ArrowAnnotation>)registrar.getService( AnnotationFactory.class,"(type=ArrowAnnotation.class)");
-		if (arrowFactory == null) 
-			System.err.println("arrowFactory is null");
+//		arrowFactory =  (AnnotationFactory<ArrowAnnotation>)registrar.getService( AnnotationFactory.class,"(type=ArrowAnnotation.class)");
+//		if (arrowFactory == null) 
+//			System.err.println("arrowFactory is null");
 		textFactory =  (AnnotationFactory<TextAnnotation>)registrar.getService( AnnotationFactory.class,"(type=TextAnnotation.class)");
 		if (textFactory == null) 
 			System.err.println("textFactory is null");
@@ -101,7 +101,7 @@ public class LegendFactory {
 		else if (isFontSize(v))
 			legend = addFontSizeLegend(title, X, Y, ioSize, minimum, maximum, Color.LIGHT_GRAY);
 		else if (isNumeric(v))
-			legend = addTrapezoidLegend(title, X, Y, width, height, continFn, Color.LIGHT_GRAY);
+			legend = addRampLegend(title, X, Y, width, height, continFn, Color.LIGHT_GRAY);
 		ioSize.width += RIGHT_MARGIN;
 		
 		if (legend != null)
@@ -325,147 +325,147 @@ public class LegendFactory {
 	private Font getLabelFont() {
 		return new Font(Font.SANS_SERIF, 0, 20);
 	}
-	//------------------------------------------------------------------
-	// discrete
-	public GroupAnnotation addLinetypeLegend(String title, int x, int y, Dimension ioSize, LineType[] strokes, String[] names)
-	{
-		//TODO
-		int NCELLS = strokes.length;
-		int MARGIN = 10;
-		int LINE_HEIGHT = 25;
-		int SWATCH_HEIGHT = LINE_HEIGHT + MARGIN;
-		int CELL_HEIGHT = SWATCH_HEIGHT + MARGIN;
-		int SWATCH_WIDTH = 120;
-		int CELL_WIDTH = SWATCH_WIDTH + MARGIN;
-		int LABEL_HEIGHT = LINE_HEIGHT + MARGIN;
-
-		boolean orientVertically = true;
-		Font font = getLabelFont();
-		int maxLabelWidth = getMaxLabelWidth(names, font);
-		int labelHeight = getStringHeight(names[0], font);
-		int half_dif = (CELL_HEIGHT - labelHeight) / 2;
-		int width =  3 * MARGIN + (orientVertically ? (CELL_WIDTH + maxLabelWidth) : (CELL_WIDTH * NCELLS));
-		int height = 2 * MARGIN +  (orientVertically ? (CELL_HEIGHT * NCELLS) : (CELL_HEIGHT + LABEL_HEIGHT));
-		ioSize.setSize(width, height);
-	
-		GroupAnnotation group = createGroupWithHeader(title, x, y, width, height);
-		if (group == null) return null;
-		addBorderBox(group, x, y,  width, height);
-		
-		
-		for (int i = 0; i < strokes.length; i++)			//LineType type : strokes
-		{
-			float xx = MARGIN + (orientVertically ? MARGIN : (i * CELL_WIDTH));
-			float yy = MARGIN + (orientVertically ? (i * CELL_HEIGHT) + 20 : 0);
-			Object[] srcArgs = { "x", x + xx, "y", y + yy,  "width", "2",  "height", "2","shapeType", "Ellipse","fillColor", 0 };
-			ShapeAnnotation src = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, ezMap(srcArgs));
-//			src.moveAnnotation(new Point2D.Double(x + xx,y + yy));
-			
-			src.setCanvas("background");
-			group.addMember(src);
-//			annotationMgr.addAnnotation(src);
-			
-			Object[] targArgs = { "x", x + xx + SWATCH_WIDTH, "y", y + yy ,  "width", 2,  "height", 2,"shapeType", "Rectangle","fillColor", 0 };
-			ShapeAnnotation targ = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, ezMap(targArgs));
-			targ.setCanvas("background");
-			group.addMember(targ);
-//			annotationMgr.addAnnotation(targ);
-
-			float dx = xx + (orientVertically ? CELL_WIDTH : 0);
-			float dy = yy + (orientVertically ? 0  : CELL_HEIGHT);
-			Object[] textArgs = { "x", x + dx, "y", y + dy - half_dif,  "width", 40,  "height", 20, "fontSize", font.getSize(), "fontFamily", font.getFamily() };
-			
-			TextAnnotation text = textFactory.createAnnotation(TextAnnotation.class, networkView, ezMap(textArgs));
-			text.setCanvas("background");
-			text.setText(names[i]);
-			group.addMember(text);
-//			annotationMgr.addAnnotation(text);
-
-			Object[] arrowArgs = { "x", x + xx, "y", y + yy, "lineThickness", "8" };   //, "edgeLineStyle", type.getSerializableString()    "width", 40,  "height", 8, "edgeLineStyle", "Dash Dot"
-			Map<String, String> argv = ezMap(arrowArgs);
-			ArrowAnnotation arrow = arrowFactory.createAnnotation(ArrowAnnotation.class, networkView, argv);  //
-			arrow.setSource(src);
-			arrow.setTarget(targ);
-			arrow.setLineWidth(8);
-			arrow.setLineColor(Color.BLACK);		//discreteColors[i]
-			arrow.setAnchorType(ArrowEnd.SOURCE, AnchorType.CENTER);
-//			arrow.setAnchorType(ArrowEnd.TARGET, AnchorType.CENTER);
-			arrow.moveAnnotation(new Point2D.Double(x + xx,y + yy));
-			arrow.setCanvas("foreground");
-			group.addMember(arrow);
-//			annotationMgr.addAnnotation(arrow);
-		}
-		return group;
-	}
-	Color[] discreteColors = { Color.BLACK, Color.BLUE, Color.RED, Color.GREEN, Color.CYAN, Color.GRAY, Color.MAGENTA, Color.YELLOW };
-	//------------------------------------------------------------------
-	// discrete
-	public GroupAnnotation addArrowheadLegend(String title, int x, int y, Dimension ioSize, String[] arrows, String[] names)
-	{
-		//TODO
-		int NCELLS = arrows.length;
-		int MARGIN = 10;
-		int LINE_HEIGHT = 25;
-		int SWATCH_HEIGHT = LINE_HEIGHT + MARGIN;;
-		int CELL_HEIGHT = SWATCH_HEIGHT + MARGIN;
-		int SWATCH_WIDTH = 120;
-		int CELL_WIDTH = SWATCH_WIDTH + MARGIN;
-		int LABEL_HEIGHT = LINE_HEIGHT + MARGIN;
-		Font font = getLabelFont();
-		int maxLabelWidth = getMaxLabelWidth(names, font);
-		int labelHeight = getStringHeight(names[0], font);
-		int half_dif = (CELL_HEIGHT - labelHeight) / 2;
-
-		boolean orientVertically = true;
-		int width =  3 * MARGIN + (orientVertically ? (CELL_WIDTH + maxLabelWidth) : (CELL_WIDTH * NCELLS));
-		int height = 2 * MARGIN +  (orientVertically ? (CELL_HEIGHT * NCELLS) : (CELL_HEIGHT + LABEL_HEIGHT));
-		ioSize.setSize(width, height);
-		GroupAnnotation group = createGroupWithHeader(title, x, y, width, height);
-		if (group == null) return null;
-		addBorderBox(group, x, y, width, height);
-		
-		for (int i = 0; i < arrows.length; i++)
-		{
-			float xx = MARGIN + (orientVertically ? 0 : (i * CELL_WIDTH));
-			float yy = MARGIN + (orientVertically ? (i * CELL_HEIGHT) + 20 : 0);
-			String type = arrows[i];
-			String name = names[i];
-			
-			Object[] dotArgs = { "x", x + xx, "y", y + yy,  "width", 2,  "height", 2, "shapeType", "Ellipse","fillColor", "0" };
-			ShapeAnnotation src = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, ezMap(dotArgs));
-			group.addMember(src);
-			
-			Object[] targArgs = { "x", x + xx + SWATCH_WIDTH, "y",  y + yy,  "width", 2,  "height", 2,"shapeType", "Rectangle","fillColor", 0 };
-			ShapeAnnotation targ = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, ezMap(targArgs));
-			group.addMember(targ);
-
-			float dx = xx + (orientVertically ? CELL_WIDTH : 0);
-			float dy = yy + (orientVertically ? 0  : CELL_HEIGHT);
-			Object[] textArgs = { "x", x + dx , "y", y + dy - half_dif,  "width", 40,  "height", 20, "fontSize","" + font.getSize() , "fontFamily", font.getFamily() };
-			TextAnnotation text = textFactory.createAnnotation(TextAnnotation.class, networkView, ezMap(textArgs));
-			text.setText(name);
-			group.addMember(text);
-
-			boolean passArgs = true;
-			Object[] arrowArgs = { "lineThickness", "8", "edgeLineStyle", "Solid" };   //, "edgeLineStyle", type.getSerializableString()
-			Map<String, String> argv = passArgs ? ezMap(arrowArgs) : null;
-			ArrowAnnotation arrow = arrowFactory.createAnnotation(ArrowAnnotation.class, networkView, argv);  //
-			arrow.setSource(src);
-			arrow.setTarget(targ);
-			arrow.setLineWidth(6);
-			arrow.setLineColor(discreteColors[i]);
-			arrow.setArrowType(ArrowEnd.SOURCE, "none");
-			arrow.setArrowType(ArrowEnd.TARGET, type);
-//			annotationMgr.addAnnotation(arrow);
-//			arrow.setCanvas("background");
-			group.addArrow(arrow);
-		}
-		return group;
-	}
+//	//------------------------------------------------------------------
+//	// discrete
+//	public GroupAnnotation addLinetypeLegend(String title, int x, int y, Dimension ioSize, LineType[] strokes, String[] names)
+//	{
+//		//TODO
+//		int NCELLS = strokes.length;
+//		int MARGIN = 10;
+//		int LINE_HEIGHT = 25;
+//		int SWATCH_HEIGHT = LINE_HEIGHT + MARGIN;
+//		int CELL_HEIGHT = SWATCH_HEIGHT + MARGIN;
+//		int SWATCH_WIDTH = 120;
+//		int CELL_WIDTH = SWATCH_WIDTH + MARGIN;
+//		int LABEL_HEIGHT = LINE_HEIGHT + MARGIN;
+//
+//		boolean orientVertically = true;
+//		Font font = getLabelFont();
+//		int maxLabelWidth = getMaxLabelWidth(names, font);
+//		int labelHeight = getStringHeight(names[0], font);
+//		int half_dif = (CELL_HEIGHT - labelHeight) / 2;
+//		int width =  3 * MARGIN + (orientVertically ? (CELL_WIDTH + maxLabelWidth) : (CELL_WIDTH * NCELLS));
+//		int height = 2 * MARGIN +  (orientVertically ? (CELL_HEIGHT * NCELLS) : (CELL_HEIGHT + LABEL_HEIGHT));
+//		ioSize.setSize(width, height);
+//	
+//		GroupAnnotation group = createGroupWithHeader(title, x, y, width, height);
+//		if (group == null) return null;
+//		addBorderBox(group, x, y,  width, height);
+//		
+//		
+//		for (int i = 0; i < strokes.length; i++)			//LineType type : strokes
+//		{
+//			float xx = MARGIN + (orientVertically ? MARGIN : (i * CELL_WIDTH));
+//			float yy = MARGIN + (orientVertically ? (i * CELL_HEIGHT) + 20 : 0);
+//			Object[] srcArgs = { "x", x + xx, "y", y + yy,  "width", "2",  "height", "2","shapeType", "Ellipse","fillColor", 0 };
+//			ShapeAnnotation src = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, ezMap(srcArgs));
+////			src.moveAnnotation(new Point2D.Double(x + xx,y + yy));
+//			
+//			src.setCanvas("background");
+//			group.addMember(src);
+////			annotationMgr.addAnnotation(src);
+//			
+//			Object[] targArgs = { "x", x + xx + SWATCH_WIDTH, "y", y + yy ,  "width", 2,  "height", 2,"shapeType", "Rectangle","fillColor", 0 };
+//			ShapeAnnotation targ = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, ezMap(targArgs));
+//			targ.setCanvas("background");
+//			group.addMember(targ);
+////			annotationMgr.addAnnotation(targ);
+//
+//			float dx = xx + (orientVertically ? CELL_WIDTH : 0);
+//			float dy = yy + (orientVertically ? 0  : CELL_HEIGHT);
+//			Object[] textArgs = { "x", x + dx, "y", y + dy - half_dif,  "width", 40,  "height", 20, "fontSize", font.getSize(), "fontFamily", font.getFamily() };
+//			
+//			TextAnnotation text = textFactory.createAnnotation(TextAnnotation.class, networkView, ezMap(textArgs));
+//			text.setCanvas("background");
+//			text.setText(names[i]);
+//			group.addMember(text);
+////			annotationMgr.addAnnotation(text);
+//
+//			Object[] arrowArgs = { "x", x + xx, "y", y + yy, "lineThickness", "8" };   //, "edgeLineStyle", type.getSerializableString()    "width", 40,  "height", 8, "edgeLineStyle", "Dash Dot"
+//			Map<String, String> argv = ezMap(arrowArgs);
+//			ArrowAnnotation arrow = arrowFactory.createAnnotation(ArrowAnnotation.class, networkView, argv);  //
+//			arrow.setSource(src);
+//			arrow.setTarget(targ);
+//			arrow.setLineWidth(8);
+//			arrow.setLineColor(Color.BLACK);		//discreteColors[i]
+//			arrow.setAnchorType(ArrowEnd.SOURCE, AnchorType.CENTER);
+////			arrow.setAnchorType(ArrowEnd.TARGET, AnchorType.CENTER);
+//			arrow.moveAnnotation(new Point2D.Double(x + xx,y + yy));
+//			arrow.setCanvas("foreground");
+//			group.addMember(arrow);
+////			annotationMgr.addAnnotation(arrow);
+//		}
+//		return group;
+//	}
+//	Color[] discreteColors = { Color.BLACK, Color.BLUE, Color.RED, Color.GREEN, Color.CYAN, Color.GRAY, Color.MAGENTA, Color.YELLOW };
+//	//------------------------------------------------------------------
+//	// discrete
+//	public GroupAnnotation addArrowheadLegend(String title, int x, int y, Dimension ioSize, String[] arrows, String[] names)
+//	{
+//		//TODO
+//		int NCELLS = arrows.length;
+//		int MARGIN = 10;
+//		int LINE_HEIGHT = 25;
+//		int SWATCH_HEIGHT = LINE_HEIGHT + MARGIN;;
+//		int CELL_HEIGHT = SWATCH_HEIGHT + MARGIN;
+//		int SWATCH_WIDTH = 120;
+//		int CELL_WIDTH = SWATCH_WIDTH + MARGIN;
+//		int LABEL_HEIGHT = LINE_HEIGHT + MARGIN;
+//		Font font = getLabelFont();
+//		int maxLabelWidth = getMaxLabelWidth(names, font);
+//		int labelHeight = getStringHeight(names[0], font);
+//		int half_dif = (CELL_HEIGHT - labelHeight) / 2;
+//
+//		boolean orientVertically = true;
+//		int width =  3 * MARGIN + (orientVertically ? (CELL_WIDTH + maxLabelWidth) : (CELL_WIDTH * NCELLS));
+//		int height = 2 * MARGIN +  (orientVertically ? (CELL_HEIGHT * NCELLS) : (CELL_HEIGHT + LABEL_HEIGHT));
+//		ioSize.setSize(width, height);
+//		GroupAnnotation group = createGroupWithHeader(title, x, y, width, height);
+//		if (group == null) return null;
+//		addBorderBox(group, x, y, width, height);
+//		
+//		for (int i = 0; i < arrows.length; i++)
+//		{
+//			float xx = MARGIN + (orientVertically ? 0 : (i * CELL_WIDTH));
+//			float yy = MARGIN + (orientVertically ? (i * CELL_HEIGHT) + 20 : 0);
+//			String type = arrows[i];
+//			String name = names[i];
+//			
+//			Object[] dotArgs = { "x", x + xx, "y", y + yy,  "width", 2,  "height", 2, "shapeType", "Ellipse","fillColor", "0" };
+//			ShapeAnnotation src = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, ezMap(dotArgs));
+//			group.addMember(src);
+//			
+//			Object[] targArgs = { "x", x + xx + SWATCH_WIDTH, "y",  y + yy,  "width", 2,  "height", 2,"shapeType", "Rectangle","fillColor", 0 };
+//			ShapeAnnotation targ = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, ezMap(targArgs));
+//			group.addMember(targ);
+//
+//			float dx = xx + (orientVertically ? CELL_WIDTH : 0);
+//			float dy = yy + (orientVertically ? 0  : CELL_HEIGHT);
+//			Object[] textArgs = { "x", x + dx , "y", y + dy - half_dif,  "width", 40,  "height", 20, "fontSize","" + font.getSize() , "fontFamily", font.getFamily() };
+//			TextAnnotation text = textFactory.createAnnotation(TextAnnotation.class, networkView, ezMap(textArgs));
+//			text.setText(name);
+//			group.addMember(text);
+//
+//			boolean passArgs = true;
+//			Object[] arrowArgs = { "lineThickness", "8", "edgeLineStyle", "Solid" };   //, "edgeLineStyle", type.getSerializableString()
+//			Map<String, String> argv = passArgs ? ezMap(arrowArgs) : null;
+//			ArrowAnnotation arrow = arrowFactory.createAnnotation(ArrowAnnotation.class, networkView, argv);  //
+//			arrow.setSource(src);
+//			arrow.setTarget(targ);
+//			arrow.setLineWidth(6);
+//			arrow.setLineColor(discreteColors[i]);
+//			arrow.setArrowType(ArrowEnd.SOURCE, "none");
+//			arrow.setArrowType(ArrowEnd.TARGET, type);
+////			annotationMgr.addAnnotation(arrow);
+////			arrow.setCanvas("background");
+//			group.addArrow(arrow);
+//		}
+//		return group;
+//	}
 	//------------------------------------------------------------------
 	// continuous
 	
-	public GroupAnnotation addTrapezoidLegend(String title, int x, int y, int w, int h, ContinuousMapping<?, ?> continFn, Color color)
+	public GroupAnnotation addRampLegend(String title, int x, int y, int w, int h, ContinuousMapping<?, ?> continFn, Color color)
 	{
 		GroupAnnotation group = createGroupWithHeader( title,  x,  y,  w,  h);
 		if (group == null) return null;
@@ -602,14 +602,21 @@ public class LegendFactory {
 		double range = maximum - minimum;
 		List<Double> stopList = new ArrayList<Double>();
 		List<Color> colorList = new ArrayList<Color>();
-		int i = 0;
-		double prevVal = Double.MIN_VALUE;
-		for (ContinuousMappingPoint<?, ?> pt : list)
+//		double prevVal = Double.MIN_VALUE;
+		for (int i = 0; i < list.size(); i++)
 		{
+			ContinuousMappingPoint<?, ?> pt = list.get(i);
+			boolean isFirst = i ==0;
+			boolean isLast = i == list.size() - 1;
+			
 			BoundaryRangeValues<?> vals = pt.getRange();
 			v = (double) pt.getValue();
-			colorList.add((Color) vals.lesserValue);
+			if (isFirst)
+				colorList.add((Color) vals.lesserValue);
+			colorList.add((Color) vals.equalValue);
 			stopList.add((v - minimum) / range);
+			if (isLast)
+				colorList.add((Color) vals.greaterValue);
 
 //			if (v instanceof Double)
 //			{

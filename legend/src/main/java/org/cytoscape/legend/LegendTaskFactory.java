@@ -5,19 +5,18 @@ import java.awt.geom.Point2D;
 import org.cytoscape.task.NetworkViewLocationTaskFactory;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.work.AbstractTaskFactory;
+import org.cytoscape.work.TaskFactory;
 import org.cytoscape.work.TaskIterator;
 
-public class LegendTaskFactory extends AbstractTaskFactory implements NetworkViewLocationTaskFactory{
+public class LegendTaskFactory extends AbstractTaskFactory implements NetworkViewLocationTaskFactory, TaskFactory{
 
 	@Override
 	public TaskIterator createTaskIterator() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public TaskIterator createTaskIterator(CyNetworkView networkView, Point2D javaPt, Point2D xformPt) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
