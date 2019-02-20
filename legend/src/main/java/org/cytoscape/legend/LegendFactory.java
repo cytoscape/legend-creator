@@ -462,6 +462,7 @@ public class LegendFactory {
 //		return group;
 //	}
 	//------------------------------------------------------------------
+	//------------------------------------------------------------------
 	// continuous
 	
 	public GroupAnnotation addRampLegend(String title, int x, int y, int w, int h, ContinuousMapping<?, ?> continFn, Color color)
