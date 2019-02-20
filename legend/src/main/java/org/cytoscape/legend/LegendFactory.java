@@ -40,14 +40,16 @@ public class LegendFactory {
 	private AnnotationManager annotationMgr;
 	private CyServiceRegistrar registrar;
 	private FontRenderContext fontRenderContext;
-	private CyNetworkView networkView;
-
-		boolean verbose = true;
+//	private CyNetworkView networkView;
+	private LegendController controller;
+	
+	boolean verbose = false;
 		
-	public LegendFactory(CyServiceRegistrar reg, CyNetworkView view)
+	public LegendFactory(CyServiceRegistrar reg, LegendController ctrol)		//, CyNetworkView view
 	{
 		registrar = reg;
-		networkView = view;
+//		networkView = view;
+		controller = ctrol;
 		annotationMgr = registrar.getService(AnnotationManager.class);
 		if (annotationMgr == null) 
 			System.err.println("AnnotationManager is null");
@@ -218,6 +220,7 @@ public class LegendFactory {
 
 		int NLINES = colors.length;
 
+		CyNetworkView networkView = controller.getNetworkView();
 		GroupAnnotation group = createGroupWithHeader(title, x, y, (int) width, (int) height);
 		if (group == null) return null;
 		addBorderBox(group, x, y, (int) width, (int) height);
@@ -287,6 +290,7 @@ public class LegendFactory {
 		int height = 2 * MARGIN +  (orientVertically ? (CELL_HEIGHT * NCELLS) : (CELL_HEIGHT + LABEL_HEIGHT));
 		ioSize.setSize(width, height);
 
+		CyNetworkView networkView = controller.getNetworkView();
 
 		GroupAnnotation group = createGroupWithHeader(title, x, y, width, height + MARGIN);
 		if (group == null) return null;
@@ -472,6 +476,7 @@ public class LegendFactory {
 		addBorderBox(group, x, y, w, h);
 		double minx = Double.MAX_VALUE, miny = Double.MAX_VALUE, maxx = Double.MIN_VALUE, maxy = Double.MIN_VALUE;
 		GeneralPath path = new GeneralPath();
+		CyNetworkView networkView = controller.getNetworkView();
 
 		if (continFn != null)
 		{
@@ -556,6 +561,7 @@ public class LegendFactory {
 		GroupAnnotation group = createGroupWithHeader( title,  x,  y,  w,  h);
 		if (group == null) return null;
 		addBorderBox(group, x, y, w, h);
+		CyNetworkView networkView = controller.getNetworkView();
 		
 		String[] text = { "smallest", "small", "medium", "large", "largest"};
 		int[] sizes = {10, 20, 30, 40, 50 };
@@ -651,8 +657,8 @@ public class LegendFactory {
 		if (group == null) return null;
 		ShapeAnnotation gradientBox = addBorderBox(group, x, y, w, h);
 
-		for (Color c : colors)
-			System.out.println(c.toString());
+//		for (Color c : colors)
+//			System.out.println(c.toString());
 		Point2D start = new Point2D.Float(0, 0);
 		Point2D end = new Point2D.Float(1f,0);
 		LinearGradientPaint p = new LinearGradientPaint(start, end, stops, colors);		
@@ -665,6 +671,7 @@ public class LegendFactory {
 
 	private GroupAnnotation createGroupWithHeader(String title, int x, int y, int w, int h)
 	{
+		CyNetworkView networkView = controller.getNetworkView();
 		Font labelFont = getLabelFont();
 		int FONTSIZE = labelFont.getSize();
 		String fontFamily = labelFont.getFamily();
@@ -685,6 +692,7 @@ public class LegendFactory {
 		titleBox.setCanvas("background");
 		group.addMember(titleBox);
 		group.setCanvas("background");
+		group.setName("legend");
 		return group;
 			
 	}
@@ -696,11 +704,13 @@ public class LegendFactory {
 		borderArgs.put("width", "" + w);
 		borderArgs.put("height", "" + h);
 		borderArgs.put("shapeType", "Rectangle");
+		CyNetworkView networkView = controller.getNetworkView();
 		ShapeAnnotation borderBox = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, borderArgs);
 		borderBox.setCanvas("background");
 		borderBox.moveAnnotation(new Point2D.Double(x,y));
 		group.addMember(borderBox);
 		group.setCanvas("background");
+		group.setName("legend");
 		return borderBox;
 	}
 	//------------------------------------------------------------------
@@ -718,7 +728,8 @@ public class LegendFactory {
 		RIGHT_MARGIN = orientVertically ? TICKWIDTH + LABELWIDTH : 0;
 		ShapeAnnotation[] ticks = new ShapeAnnotation[TICKS];
 		TextAnnotation[] vals = new TextAnnotation[TICKS];
-		
+		CyNetworkView networkView = controller.getNetworkView();
+	
 		for (int t = 0; t < TICKS; t++)
 		{
 			double xt = orientVertically ? (x + w) : (x + (t * w / 4));
@@ -773,6 +784,7 @@ public class LegendFactory {
 		RIGHT_MARGIN = TICKWIDTH + LABELWIDTH;
 		ShapeAnnotation[] ticks = new ShapeAnnotation[TICKS];
 		TextAnnotation[] vals = new TextAnnotation[TICKS];
+		CyNetworkView networkView = controller.getNetworkView();
 		
 		for (int t = 0; t < TICKS; t++)
 		{

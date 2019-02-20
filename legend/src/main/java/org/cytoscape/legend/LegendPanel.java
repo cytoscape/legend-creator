@@ -57,7 +57,7 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 	
 	JButton adder = new JButton("Add Legend");
 	JButton selectAll = new JButton("Select All Annotations");			// DEBUG
-	JButton clearAll = new JButton("Remove All Annotations");
+	JButton clearAll = new JButton("Remove Legends");
 	JButton tester = new JButton("Test");
 
 //	JLabel clickNotice = new JLabel("Click in the canvas to place the legend");
@@ -87,7 +87,6 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 		JButton scanner = new JButton("Scan Network");
 		ActionListener scan = new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) { 
-				setCurrentNetwork();
 				controller.scanNetwork();
 				}
 		};
@@ -124,12 +123,19 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 			}
 		};
 		adder.addActionListener(layout);
-		add(line(adder));
+		add(line(clearAll, adder));
 //		add(line(clickNotice));
 //		clickNotice.setVisible(false);
 
 		add(Box.createVerticalGlue());		//-------
 
+		ActionListener clrAll = new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) { controller.clearAnnotations();  }
+		};
+		clearAll.addActionListener(clrAll);
+//		add(line(clearAll));
+
+		
 		if (showDebugButtons)
 		{
 			ActionListener test = new ActionListener() {
@@ -144,11 +150,6 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 			selectAll.addActionListener(selAll);
 			add(line(selectAll));
 	
-			ActionListener clrAll = new ActionListener() {
-				@Override public void actionPerformed(ActionEvent e) { controller.clearAnnotations();  }
-			};
-			clearAll.addActionListener(clrAll);
-			add(line(clearAll));
 			}
 	}
 

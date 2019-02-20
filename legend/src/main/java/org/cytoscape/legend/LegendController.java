@@ -78,7 +78,7 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 //		if (cyApplicationManager != null) return;
 		cyApplicationManager = registrar.getService(CyApplicationManager.class);
 		annotationMgr = registrar.getService(AnnotationManager.class);
-		factory = new LegendFactory(registrar, networkView);
+		factory = new LegendFactory(registrar, this);
 
 		network = cyApplicationManager.getCurrentNetwork();
 		networkView = cyApplicationManager.getCurrentNetworkView();
@@ -100,6 +100,8 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 		initialize();
 		candidates.clear();
 		if (network == null) return;
+		network = cyApplicationManager.getCurrentNetwork();
+		networkView = cyApplicationManager.getCurrentNetworkView();
 		legendPanel.setCurrentNetwork();
 		
 		// Now we cruise thru the list of node, then edge attributes looking for mappings.  Each mapping may potentially be a legend entry.
@@ -179,6 +181,7 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 //-------------------------------------------------------------------------------
 	public void layout()
 	{
+		networkView = cyApplicationManager.getCurrentNetworkView();
 		for (LegendCandidate candidate : candidates)
 			candidate.extract();			
 		if (legendPanel != null)
@@ -224,7 +227,7 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 			Map<String,String> strs = LegendFactory.ezMap(textArgs);
 			TextAnnotation textBox = factory.createTextAnnotation(TextAnnotation.class, networkView, strs);
 			textBox.setCanvas("background");
-			textBox.setName(title);
+			textBox.setName("legend");
 			annotationMgr.addAnnotation(textBox);
 			y += LINE_HEIGHT;
 		
@@ -235,7 +238,7 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 			Map<String,String> strs = LegendFactory.ezMap(textArgs);
 			TextAnnotation textBox = factory.createTextAnnotation(TextAnnotation.class, networkView, strs);
 			textBox.setCanvas("background");
-			textBox.setName(subtitle);
+			textBox.setName("legend");
 			annotationMgr.addAnnotation(textBox);
 			y += LINE_HEIGHT;
 		}
@@ -287,7 +290,7 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 			Map<String,String> strs = LegendFactory.ezMap(boxArgs);
 			ShapeAnnotation lineBox = factory.createShapeAnnotation(ShapeAnnotation.class, networkView, strs);
 			lineBox.setCanvas("background");
-			lineBox.setName("Bounding Box");
+			lineBox.setName("legend");
 			annotationMgr.addAnnotation(lineBox);
 		}
 //		networkView.refresh();
@@ -464,7 +467,8 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 			System.err.println("annotationMgr:  " + annotationMgr + "  networkView: " + networkView);
 		else for (Annotation a: annotationMgr.getAnnotations(networkView)) {
 		    if (a == null) continue;
-		    annotationMgr.removeAnnotation(a);
+		    if ("legend".equals(a.getName()))
+		    	annotationMgr.removeAnnotation(a);
 		}
 		
 	}
@@ -578,8 +582,11 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 	public void handleEvent(SetCurrentNetworkEvent e) {
 
 		network = e.getNetwork();
-		networkView = cyApplicationManager.getCurrentNetworkView();
-		scanNetwork();
+		if (cyApplicationManager != null)
+		{
+			networkView = cyApplicationManager.getCurrentNetworkView();
+			scanNetwork();
+		}
 	}
 	
 }

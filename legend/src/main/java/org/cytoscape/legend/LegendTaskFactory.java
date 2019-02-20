@@ -11,13 +11,7 @@ import org.cytoscape.work.TaskIterator;
 public class LegendTaskFactory extends AbstractTaskFactory implements NetworkViewLocationTaskFactory, TaskFactory{
 
 	@Override
-<<<<<<< HEAD
-	public TaskIterator createTaskIterator() {
-		return null;
-	}
-=======
 	public TaskIterator createTaskIterator() {		return null;	}
->>>>>>> 488dd4a8f7ef97482ffbbea100596c7d623156be
 
 	@Override
 	public TaskIterator createTaskIterator(CyNetworkView networkView, Point2D javaPt, Point2D xformPt) {

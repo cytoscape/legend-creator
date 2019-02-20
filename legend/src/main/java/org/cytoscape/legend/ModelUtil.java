@@ -21,7 +21,7 @@ public class ModelUtil {
 			NodeShape shape = (NodeShape) nodeView.getVisualProperty(BasicVisualLexicon.NODE_SHAPE);
 			shapeTypeMap.put(shape, nodeView.getModel());
 		}
-		System.out.println("shapes " + shapeTypeMap.size() + "  " + shapeTypeMap.keySet());
+//		System.out.println("shapes " + shapeTypeMap.size() + "  " + shapeTypeMap.keySet());
 		return shapeTypeMap;
 	}
 
@@ -33,7 +33,7 @@ public class ModelUtil {
 			shapeTypeMap.put(shape, nodeView.getModel());
 		}
 
-		System.out.println("shapes " + shapeTypeMap.size() + "  " + shapeTypeMap.keySet());
+//		System.out.println("shapes " + shapeTypeMap.size() + "  " + shapeTypeMap.keySet());
 		return shapeTypeMap;
 	}
 
@@ -44,7 +44,7 @@ public class ModelUtil {
 			Paint paint = nodeView.getVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR);
 			fillColorMap.put(paint, nodeView.getModel());
 		}
-		System.out.println("colors " + fillColorMap.size() + "  " + fillColorMap.keySet());
+//		System.out.println("colors " + fillColorMap.size() + "  " + fillColorMap.keySet());
 		return fillColorMap;
 	}
 
