@@ -2,6 +2,7 @@ package org.cytoscape.legend;
 
 import java.util.Properties;
 
+import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CyAction;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanelComponent;
@@ -28,6 +29,7 @@ public class CyActivator extends AbstractCyActivator {
 		registerService(bc,legendPanel,CytoPanelComponent.class);
 		registerService(bc,legendAction,CyAction.class);
 		registerAllServices(bc,controller);
+		registerService(bc, controller, SetCurrentNetworkListener.class);
 //		System.out.println("loading legendCreator!");
 
 

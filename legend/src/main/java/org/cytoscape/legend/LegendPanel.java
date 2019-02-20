@@ -47,8 +47,10 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 	public String getTitle() 					{		return "Legend Panel";	}
 	public Icon getIcon() 						{		return null;	}
 
-	JCheckBox 		layoutVertical = new JCheckBox("Lay out vertically");
-	JCheckBox  		drawBorder = new JCheckBox("Draw bounding box");
+	private static boolean showDebugButtons = false;
+	
+	JCheckBox 	layoutVertical = 	new JCheckBox("Lay out vertically");
+	JCheckBox  	drawBorder = 		new JCheckBox("Draw bounding box");
 	JLabel curNetNameLabel = new JLabel("No network selected");
 	JTextField title  = new JTextField();
 	JTextField subtitle  = new JTextField();
@@ -58,9 +60,9 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 	JButton clearAll = new JButton("Remove All Annotations");
 	JButton tester = new JButton("Test");
 
-	JLabel clickNotice = new JLabel("Click in the canvas to place the legend");
+//	JLabel clickNotice = new JLabel("Click in the canvas to place the legend");
 	
-	public void hideNotice() {	clickNotice.setVisible(false);  }
+//	public void hideNotice() {	clickNotice.setVisible(false);  }
 	
 	
 	//--------------------------------------------------------------------
@@ -87,22 +89,7 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 			@Override public void actionPerformed(ActionEvent e) { 
 				setCurrentNetwork();
 				controller.scanNetwork();
-				optionsPanel.removeAll();
-				for (LegendCandidate candidate : controller.getCandidates())
-				{
-					VisualMappingFunction<?,?> fn = candidate.getFunction();
-					String type = fn.getMappingColumnType().toString();
-					int idx = type.lastIndexOf('.');
-					if (idx > 0) type = type.substring(idx+1);
-					VisualProperty<?> prop = fn.getVisualProperty();
-					String dispName = prop.getDisplayName();
-					String name = "Show " + fn.getMappingColumnName() + " as " + dispName;
-					JCheckBox checkbox = new JCheckBox(name, true);
-					optionsPanel.add(line(checkbox));
-					candidate.setCheckBox(checkbox);
 				}
-				optionsPanel.repaint();
-			}
 		};
 		scanner.addActionListener(scan);
 		add(line(scanner,curNetNameLabel));
@@ -132,36 +119,37 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 		ActionListener layout = new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) 
 			{
-				clickNotice.setVisible(true);
+//				clickNotice.setVisible(true);
 				controller.layout(); 
 			}
 		};
 		adder.addActionListener(layout);
 		add(line(adder));
-		add(line(clickNotice));
-		clickNotice.setVisible(false);
+//		add(line(clickNotice));
+//		clickNotice.setVisible(false);
 
 		add(Box.createVerticalGlue());		//-------
 
-		ActionListener test = new ActionListener() {
-			@Override public void actionPerformed(ActionEvent e) { controller.testAnnotations();  }
-		};
-		tester.addActionListener(test);
-		add(line(tester));
-
-		ActionListener selAll = new ActionListener() {
-			@Override public void actionPerformed(ActionEvent e) { controller.selectAllAnnotations();  }
-		};
-		selectAll.addActionListener(selAll);
-		add(line(selectAll));
-
-		ActionListener clrAll = new ActionListener() {
-			@Override public void actionPerformed(ActionEvent e) { controller.clearAnnotations();  }
-		};
-		clearAll.addActionListener(clrAll);
-		add(line(clearAll));
-
-		
+		if (showDebugButtons)
+		{
+			ActionListener test = new ActionListener() {
+				@Override public void actionPerformed(ActionEvent e) { controller.testAnnotations();  }
+			};
+			tester.addActionListener(test);
+			add(line(tester));
+	
+			ActionListener selAll = new ActionListener() {
+				@Override public void actionPerformed(ActionEvent e) { controller.selectAllAnnotations();  }
+			};
+			selectAll.addActionListener(selAll);
+			add(line(selectAll));
+	
+			ActionListener clrAll = new ActionListener() {
+				@Override public void actionPerformed(ActionEvent e) { controller.clearAnnotations();  }
+			};
+			clearAll.addActionListener(clrAll);
+			add(line(clearAll));
+			}
 	}
 
 	//--------------------------------------------------------------------
@@ -172,6 +160,28 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 			component.setEnabled(on);
 	}
 	
+	public void resetOptionsPanel()
+	{
+		optionsPanel.removeAll();
+		for (LegendCandidate candidate : controller.getCandidates())
+		{
+			VisualMappingFunction<?,?> fn = candidate.getFunction();
+			String type = fn.getMappingColumnType().toString();
+			int idx = type.lastIndexOf('.');
+			if (idx > 0) type = type.substring(idx+1);
+			VisualProperty<?> prop = fn.getVisualProperty();
+			String colName = fn.getMappingColumnName();
+			String dispName = prop.getDisplayName();
+			String name = String.format("Show %s as %s", colName, dispName);
+			JCheckBox checkbox = new JCheckBox(name, true);
+			candidate.setCheckBox(checkbox);
+			optionsPanel.add(line(checkbox));
+			checkbox.setSelected(true);
+		}
+		optionsPanel.setVisible(false);
+		optionsPanel.setVisible(true);
+
+	}
 	//--------------------------------------------------------------------
 	public void setCurrentNetwork()
 	{

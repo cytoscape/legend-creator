@@ -42,7 +42,7 @@ public class LegendFactory {
 	private FontRenderContext fontRenderContext;
 	private CyNetworkView networkView;
 
-		boolean verbose = false;
+		boolean verbose = true;
 		
 	public LegendFactory(CyServiceRegistrar reg, CyNetworkView view)
 	{
@@ -71,7 +71,7 @@ public class LegendFactory {
 	int RIGHT_MARGIN = 0;
 	public int getRightMargin() {		return RIGHT_MARGIN;		}
 
-	public void addContinuousMapLegend(ContinuousMapping<?, ?> continFn, int X, int Y, Dimension ioSize) {
+	public boolean addContinuousMapLegend(ContinuousMapping<?, ?> continFn, int X, int Y, Dimension ioSize) {
 		
 		int width = ioSize.width ;
 		int height = ioSize.height;
@@ -89,8 +89,8 @@ public class LegendFactory {
 		if (verbose)
 		{
 			System.out.print(title + " has range (" + minimum + "  - " + maximum + ") "); 					
-			System.out.print(title + " has Y range (" + rangeY.lesserValue + "  - " + rangeY.greaterValue + ") "); 					
-			System.out.println(title + " and is of type " + getType(v)); 					
+			System.out.print(" has Y range (" + rangeY.lesserValue + "  - " + rangeY.greaterValue + ") "); 					
+			System.out.println(" and is of type " + getType(v)); 					
 			System.out.println("Draw box: " + (borderBox ? "true" : "false")); 	
 		}
 		
@@ -106,6 +106,7 @@ public class LegendFactory {
 		
 		if (legend != null)
 			annotationMgr.addAnnotation(legend);
+		return legend != null;
 	}
 	
 
@@ -229,9 +230,7 @@ public class LegendFactory {
 			ShapeAnnotation lineBox = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, strs);
 			lineBox.setFillColor(colors[i]);
 			lineBox.setCanvas("background");
-//			annotationMgr.addAnnotation(lineBox);
 			group.addMember(lineBox);
-//			lineBox.moveAnnotation(new Point2D.Double(MARGIN,yy));
 
 			float dx = xx + (orientVertically ? CELL_WIDTH + MARGIN :  MARGIN);
 			float dy = yy + (orientVertically ? CELL_HEIGHT /2f : CELL_HEIGHT);
@@ -301,7 +300,7 @@ public class LegendFactory {
 			Object[] swatchArgs = { "x", x + xx, "y", y + yy , "width", siz, "height", siz,  "shapeType" , shapes[i].name() };
 			Map<String,String> strs = ezMap(swatchArgs);
 			ShapeAnnotation lineBox = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, strs);
-			lineBox.setFillColor(Color.BLUE);
+			lineBox.setFillColor(Color.lightGray);
 			lineBox.setCanvas("background");
 //			annotationMgr.addAnnotation(lineBox);
 			group.addMember(lineBox);
@@ -612,11 +611,18 @@ public class LegendFactory {
 			BoundaryRangeValues<?> vals = pt.getRange();
 			v = (double) pt.getValue();
 			if (isFirst)
+			{
 				colorList.add((Color) vals.lesserValue);
+				stopList.add((v - minimum) / range);
+				v += .001;
+			}
 			colorList.add((Color) vals.equalValue);
-			stopList.add((v - minimum) / range);
+			stopList.add(Math.max(0,  -0.0001 + (v - minimum) / range));
 			if (isLast)
+			{
 				colorList.add((Color) vals.greaterValue);
+				stopList.add((v - minimum) / range);
+			}
 
 //			if (v instanceof Double)
 //			{

@@ -13,6 +13,8 @@ import java.util.Map;
 import javax.swing.JCheckBox;
 
 import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.application.events.SetCurrentNetworkEvent;
+import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.events.CytoPanelComponentSelectedEvent;
 import org.cytoscape.application.swing.events.CytoPanelComponentSelectedListener;
 import org.cytoscape.model.CyNetwork;
@@ -54,7 +56,7 @@ import org.cytoscape.view.vizmap.mappings.DiscreteMapping;
  * one GroupAnnotation for each attribute that is checked.
  */
 
-public class LegendController implements CytoPanelComponentSelectedListener {
+public class LegendController implements CytoPanelComponentSelectedListener, SetCurrentNetworkListener {
 
 	private CyServiceRegistrar registrar;
 	public LegendController(CyServiceRegistrar reg)
@@ -98,12 +100,14 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 		initialize();
 		candidates.clear();
 		if (network == null) return;
+		legendPanel.setCurrentNetwork();
 		
 		// Now we cruise thru the list of node, then edge attributes looking for mappings.  Each mapping may potentially be a legend entry.
 		VisualMappingManager manager = (VisualMappingManager) registrar.getService( VisualMappingManager.class);
 		VisualStyle style = manager.getCurrentVisualStyle();
 //		System.out.println("style: " + style.getTitle());
 		findLegendCandidates(style);
+		legendPanel.resetOptionsPanel();
 	}
 	
 	private List<LegendCandidate> candidates  = new ArrayList<LegendCandidate>();
@@ -120,7 +124,6 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 			candidates.add(new LegendCandidate(fn));
 		}
 		Collections.sort(candidates);
-		
 	}
 	
 	public void setCurrentNetView(CyNetworkView newView)
@@ -257,16 +260,20 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 				System.out.println("The attribute " + fn.getMappingColumnName() + " (" + 
 					type + ") is shown with " + dispName + " with a " + mapType + " function");
 			
+			boolean added = false;
 			if (mapType.contains("Continuous"))
-				factory.addContinuousMapLegend((ContinuousMapping<?, ?>) fn, x, y, size);
+				added = factory.addContinuousMapLegend((ContinuousMapping<?, ?>) fn, x, y, size);
 			else if (mapType.contains("Discrete"))
-				addDiscreteMapLegend((DiscreteMapping<?, ?>) fn, x, y, size);		
+				added = addDiscreteMapLegend((DiscreteMapping<?, ?>) fn, x, y, size);		
 
-			if (layoutVertically) 	{  	dX = 0; dY = size.height + SPACER; }		// increment Y
-			else 					{	dY = 0; dX = size.width + SPACER; }		// increment X
+			if (added)
+			{
+				if (layoutVertically) 	{  	dX = 0; dY = size.height + SPACER; }	// increment Y
+				else 					{	dY = 0; dX = size.width + SPACER; }		// increment X
 
-			x += dX;
-			y += dY;
+				x += dX;
+				y += dY;
+			}
 		}
 		int totalWidth = x - startX;
 		int totalHeight = y  - startY;
@@ -296,7 +303,7 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 		return null;
 	}
 
-	private void addDiscreteMapLegend(DiscreteMapping<?, ?> fn, int x, int y, Dimension outSize) 
+	private boolean addDiscreteMapLegend(DiscreteMapping<?, ?> fn, int x, int y, Dimension outSize) 
 	{
 		VisualProperty<?> prop = fn.getVisualProperty();
 		String dispName = prop.getDisplayName();
@@ -310,8 +317,8 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 			Map<?,?> set = fn.getAll();
 			for (Object key : set.keySet())
 			{
+				Object val = set.get(key);
 				String s = key.toString();
-				Object val = set.get(s);
 				ShapeType shape = getShapeType(val.toString());
 				
 				if (shape != null && shapeIsUsed(shape, used))			// && typeIsUsed(s, types)
@@ -382,6 +389,7 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 		
 		if (legend != null)
 			annotationMgr.addAnnotation(legend);
+		return legend != null;
 		
 	}
 	private boolean shapeIsUsed(ShapeType shape, Map<NodeShape, CyNode >used) {
@@ -420,10 +428,11 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 
 	  public String toString()	  {	  return func.getMappingColumnName();  }
 	  public VisualMappingFunction<?,?> getFunction()	  {	  return func;  }
+	  
 	  public void setCheckBox(JCheckBox ck)	  	{	checkBox = ck;  }
 	  public JCheckBox getCheckBox()	  			{	return checkBox;  }
 	  public void extract()	  					{	if (checkBox != null) 	visible = checkBox.isSelected();  }
-	  boolean isVisible()						{ 	return checkBox != null ;	}
+	  boolean isVisible()						{ 	return checkBox != null && checkBox.isSelected() ;	}
 	  
 	@Override public int compareTo(LegendCandidate o) {
 	
@@ -565,5 +574,12 @@ public class LegendController implements CytoPanelComponentSelectedListener {
 	    }
 	    return null;
 	  }
+	@Override
+	public void handleEvent(SetCurrentNetworkEvent e) {
+
+		network = e.getNetwork();
+		networkView = cyApplicationManager.getCurrentNetworkView();
+		scanNetwork();
+	}
 	
 }
