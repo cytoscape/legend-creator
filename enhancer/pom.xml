@@ -2,20 +2,20 @@
 	<modelVersion>4.0.0</modelVersion>
 	
 	<properties>
-		<bundle.symbolicName>org.cytoscape.legend</bundle.symbolicName>
-		<bundle.namespace>org.cytoscape.legend</bundle.namespace>
-		<cytoscape.api.version>3.6.0</cytoscape.api.version>
+		<bundle.symbolicName>org.cytoscape.enhancer</bundle.symbolicName>
+		<bundle.namespace>org.cytoscape.enhancer</bundle.namespace>
+		<cytoscape.api.version>3.7.0</cytoscape.api.version>
 		
 		<maven-bundle-plugin.version>2.3.4</maven-bundle-plugin.version>
 		<osgi.api.version>4.2.0</osgi.api.version>
 	</properties>
 
 	<groupId>org.cytoscape</groupId>
-	<artifactId>legend-creator</artifactId>
+	<artifactId>enhancer</artifactId>
 	<packaging>bundle</packaging>
-	<version>1.1.2</version>
+	<version>0.0.1</version>
 	
-	<name>Legend Creator</name>
+	<name>Enhancer</name>
 
 	<build>
 		<plugins>
