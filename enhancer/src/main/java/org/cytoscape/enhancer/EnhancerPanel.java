@@ -188,6 +188,10 @@ JPanel makeIntro()
 		add(line(clearAll, adder));
 		clearAll.addActionListener(clrAll);
 
+		doIt.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) { controller.enhance(extract());  }
+		});
+		
 		addCategory();
 		add(Box.createVerticalGlue());		//-------
 	}
