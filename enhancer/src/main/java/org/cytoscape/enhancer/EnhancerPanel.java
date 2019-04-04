@@ -51,7 +51,54 @@ public class EnhancerPanel extends JPanel implements CytoPanelComponent {
 	JButton clearAll = new JButton("Clear");
 
 	List<ColumnMapPane> categories = new ArrayList<ColumnMapPane>();
-	
+	int lineHeight = 40;
+	Dimension dim = new Dimension(400, lineHeight);
+	Dimension numDimension = new Dimension(40, 30);
+	Dimension columnDimension = new Dimension(140, lineHeight);
+	Dimension colorDimension = new Dimension(24, 24);
+	Dimension colorLabDimension = new Dimension(64, lineHeight);
+	Dimension rangeDimension = new Dimension(100, lineHeight);
+
+JPanel makeIntro()
+{
+	JPanel intro = new JPanel();
+	intro.setLayout(new BoxLayout(intro, BoxLayout.PAGE_AXIS));
+	JLabel label1 = new JLabel("Select the columns and colors to assign to the pies.");
+	JLabel label2 = new JLabel("Range can be optionally set to get normalized colors.");
+	intro.add(line(label1));
+	intro.add(line(label2));
+	intro.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
+	LookAndFeelUtil.makeSmall(label1);
+	LookAndFeelUtil.makeSmall(label2);
+	return intro;
+
+}
+	JPanel makeHeader()
+	{
+		JLabel lab1 = new JLabel("Column");
+		JLabel lab2 = new JLabel("Color");
+		JLabel lab3 = new JLabel("Range");
+		LookAndFeelUtil.makeSmall(lab1,lab2, lab3);
+		setSizes(lab1, columnDimension);
+		setSizes(lab2, colorLabDimension);
+		setSizes(lab3, rangeDimension);
+		JPanel line = new JPanel();
+		setSizes(line, dim);
+		line.setLayout(new BoxLayout(line, BoxLayout.LINE_AXIS));
+		line.add(lab1);
+		line.add(lab2);
+		line.add(lab3);
+		return line;
+		
+	}
+
+	static void setSizes(Component p, Dimension d)
+	{
+		p.setMinimumSize(d);
+		p.setMaximumSize(d);
+		p.setPreferredSize(d);
+		
+	}
 	class ColumnMapPane extends JPanel
 	{
 		JComboBox<String> column;
@@ -62,38 +109,37 @@ public class EnhancerPanel extends JPanel implements CytoPanelComponent {
 			
 		private ColumnMapPane()
 		{
-			int lineHeight = 40;
-			Dimension dim = new Dimension(400, lineHeight);
-			setSize(dim);
-			setMaximumSize(dim);
-			Dimension numDimension = new Dimension(40, lineHeight);
-			Dimension columnDimension = new Dimension(140, lineHeight);
-			Dimension colorDimension = new Dimension(30, lineHeight);
-			column = new JComboBox<String>(colNames); 	column.setSize(columnDimension);
-			colorButton = new ColorMenuButton(); 		
-			colorButton.setMinimumSize(numDimension);
-			colorButton.setMaximumSize(numDimension);
-			colorButton.setPreferredSize(numDimension);
+			setSizes(this, dim);
+			column = new JComboBox<String>(colNames); 	
+			column.setSize(columnDimension);
+			colorButton = new ColorMenuButton();
+			setSizes(colorButton,colorDimension); 
+			colorButton.setMinimumSize(colorDimension);
+			colorButton.setMaximumSize(colorDimension);
+			colorButton.setPreferredSize(colorDimension);
 			JPanel around = new JPanel();
 			around.add(colorButton);
-			around.setBorder(BorderFactory.createDashedBorder(Color.blue));
+//			around.setBorder(BorderFactory.createDashedBorder(Color.blue));
 			//			colorButton.setSize(colorDimension);
 			minVal = new JTextField("0.0"); 				
-			minVal.setSize(numDimension);
-			minVal.setMinimumSize(numDimension);
-			minVal.setMaximumSize(numDimension);
+			setSizes(minVal,numDimension);
 			maxVal = new JTextField("1.0");				
 			maxVal.setSize(numDimension);
-			maxVal.setMinimumSize(numDimension);
-			maxVal.setMaximumSize(numDimension);
+			setSizes(maxVal,numDimension);
 //			colorButton.setBorder(BorderFactory.createLineBorder(Color.red));
 			setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 			add(column);		add(Box.createHorizontalStrut(20));
 //			JButton b = new JButton("Push");
 //			add(b);
 			add(around);	add(Box.createHorizontalStrut(20));
-			add(new JLabel("Min:")); add(minVal); add(Box.createHorizontalStrut(20));
-			add(new JLabel("Max:")); add(maxVal);
+			LookAndFeelUtil.makeSmall(minVal);
+			LookAndFeelUtil.makeSmall(maxVal);
+			JLabel lab1 = new JLabel("Min:");
+			JLabel lab2 = new JLabel("Max:");
+			LookAndFeelUtil.makeSmall(lab1);
+			LookAndFeelUtil.makeSmall(lab2);
+			add(lab1); add(minVal); add(Box.createHorizontalStrut(20));
+			add(lab2); add(maxVal);
 			setBorder(BorderFactory.createLineBorder(Color.ORANGE));
 		}
 		
@@ -113,23 +159,13 @@ public class EnhancerPanel extends JPanel implements CytoPanelComponent {
 	private void buildUI() {
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-		JPanel intro = new JPanel();
-		intro.setLayout(new BoxLayout(intro, BoxLayout.PAGE_AXIS));
-		JLabel label1 = new JLabel("Select the columns and colors to assign to the pies.");
-		JLabel label2 = new JLabel("Range can be optionally set to get normalized colors.");
-		intro.add(line(label1));
-		intro.add(line(label2));
-		intro.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
-		add(intro);
-		LookAndFeelUtil.makeSmall(label1);
-		LookAndFeelUtil.makeSmall(label2);
-
+		add(makeIntro());
 		categoryParentPanel = new JPanel();
 //		optionsPanel.setAlignmentX(0f);
 		categoryParentPanel.setBorder(BorderFactory.createEtchedBorder());
 		categoryParentPanel.setLayout(new BoxLayout(categoryParentPanel, BoxLayout.PAGE_AXIS));
 		categoryParentPanel.add(Box.createRigidArea(new Dimension(10,10)));
-	
+		categoryParentPanel.add(makeHeader());
 		add(categoryParentPanel);
 		add(Box.createRigidArea(new Dimension(20, 20)));
 		add(Box.createGlue());

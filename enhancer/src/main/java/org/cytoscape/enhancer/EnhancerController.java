@@ -76,7 +76,12 @@ public class EnhancerController implements CytoPanelComponentSelectedListener, S
 		networkView = cyApplicationManager.getCurrentNetworkView();
 
 	}
+	public void enhance(String extract) {
+		// TODO Auto-generated method stub
+		
+	}
 
+	//-------------------------------------------------------------------------------
 	@Override
 	public void handleEvent(SetCurrentNetworkEvent e) {
 
