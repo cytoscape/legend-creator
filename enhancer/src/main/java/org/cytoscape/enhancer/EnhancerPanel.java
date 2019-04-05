@@ -53,12 +53,13 @@ public class EnhancerPanel extends JPanel implements CytoPanelComponent {
 	List<ColumnMapPane> categories = new ArrayList<ColumnMapPane>();
 	int lineHeight = 40;
 	Dimension dim = new Dimension(400, lineHeight);
+	Dimension dim4lines = new Dimension(400, 4*lineHeight);
 	Dimension numDimension = new Dimension(40, 30);
 	Dimension columnDimension = new Dimension(140, lineHeight);
 	Dimension colorDimension = new Dimension(24, 24);
 	Dimension colorLabDimension = new Dimension(64, lineHeight);
 	Dimension rangeDimension = new Dimension(100, lineHeight);
-
+	
 JPanel makeIntro()
 {
 	JPanel intro = new JPanel();
@@ -85,6 +86,7 @@ JPanel makeIntro()
 		JPanel line = new JPanel();
 		setSizes(line, dim);
 		line.setLayout(new BoxLayout(line, BoxLayout.LINE_AXIS));
+		line.add(Box.createHorizontalStrut(20));
 		line.add(lab1);
 		line.add(lab2);
 		line.add(lab3);
@@ -140,7 +142,7 @@ JPanel makeIntro()
 			LookAndFeelUtil.makeSmall(lab2);
 			add(lab1); add(minVal); add(Box.createHorizontalStrut(20));
 			add(lab2); add(maxVal);
-			setBorder(BorderFactory.createLineBorder(Color.ORANGE));
+//			setBorder(BorderFactory.createLineBorder(Color.ORANGE));
 		}
 		
 		public String getColumn()	{ return "" + column.getSelectedItem(); }
@@ -167,6 +169,7 @@ JPanel makeIntro()
 		categoryParentPanel.add(Box.createRigidArea(new Dimension(10,10)));
 		categoryParentPanel.add(makeHeader());
 		add(categoryParentPanel);
+		categoryParentPanel.setMinimumSize(dim4lines);
 		add(Box.createRigidArea(new Dimension(20, 20)));
 		add(Box.createGlue());
 
@@ -185,12 +188,12 @@ JPanel makeIntro()
 		ActionListener clrAll = new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) { resetOptionsPanel();  }
 		};
-		add(line(clearAll, adder));
 		clearAll.addActionListener(clrAll);
 
 		doIt.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) { controller.enhance(extract());  }
 		});
+		add(line(doIt, clearAll, adder));
 		
 		addCategory();
 		add(Box.createVerticalGlue());		//-------
@@ -229,7 +232,7 @@ JPanel makeIntro()
 		{
 			builder.append(pane.getColumn());
 			Color c = pane.getCatColor();
-			builder.append("\t").append(c.toString()).append("\t");
+			builder.append("\t").append(Colors.toString(c)).append("\t");
 			builder.append ("[").append(pane.getMin());
 			builder.append (",").append(pane.getMax()).append ("]\n");
 		}
@@ -250,13 +253,15 @@ JPanel makeIntro()
 		return box;
 	}
 	
-	private JPanel line(JComponent subA, JComponent subB)
+	private JPanel line(JComponent subA, JComponent subB, JComponent subC)
 	{
 		JPanel box = new JPanel();
 		box.setLayout(new BoxLayout(box, BoxLayout.LINE_AXIS));
 		box.add(subA);
 		box.add(Box.createRigidArea(new Dimension(12,12)));
 		box.add(subB);
+		box.add(Box.createRigidArea(new Dimension(12,12)));
+		box.add(subC);
 		box.add(Box.createHorizontalGlue());
 //		box.setBorder(BorderFactory.createLineBorder(Color.blue));
 		return box;

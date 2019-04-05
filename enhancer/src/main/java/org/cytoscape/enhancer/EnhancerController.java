@@ -77,7 +77,7 @@ public class EnhancerController implements CytoPanelComponentSelectedListener, S
 
 	}
 	public void enhance(String extract) {
-		// TODO Auto-generated method stub
+		System.out.println(extract);
 		
 	}
 
