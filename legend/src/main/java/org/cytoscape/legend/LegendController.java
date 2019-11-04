@@ -142,7 +142,7 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 	private String title;
 	private String subtitle;
 	private CyNetworkView currentNetworkView;
-	private boolean verbose = false;
+	private boolean verbose = true;
 	
 	public void setLayout(boolean vert)		{ 	layoutVertically = vert;	}
 	public void setDrawBorder(boolean show)	{ 	borderBox = show;	factory.setDrawBorder(show);}
@@ -245,10 +245,14 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 		if (title.length() > 0 || subtitle.length() > 0)  
 			y += LINE_HEIGHT;
 		
+		int maxWidth = 0; 
+		int maxHeight = 0;
 		for (LegendCandidate candidate : candidates)
 		{
 			if (!candidate.isVisible())   // check box not selected
-				continue;
+			{
+				System.out.println("hidden");continue;
+			}
 			VisualMappingFunction<?,?> fn = candidate.getFunction();
 			String type = fn.getMappingColumnType().toString();
 			int idx = type.lastIndexOf('.');
@@ -276,17 +280,23 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 
 				x += dX;
 				y += dY;
+				maxWidth = Math.max(maxWidth, size.width);
+				maxHeight = Math.max(maxHeight, size.height);
+				if (verbose) 	System.out.println("xy: " + x + ", " + y + " = [" + size.width + " x " + size.height + "] " +
+						mapType + " " + (x - startX) + ", " + (y  - startY) + " {" + maxWidth + ", " + maxHeight + "}");		
 			}
 		}
 		int totalWidth = x - startX;
 		int totalHeight = y  - startY;
-		if (layoutVertically)	totalWidth += DEFAULT_WIDTH + SPACER;
-		else 					totalHeight += DEFAULT_HEIGHT + SPACER;
-		
+		if (layoutVertically)	totalWidth += Math.max(DEFAULT_WIDTH + SPACER, maxWidth);
+		else 					totalHeight += Math.max(DEFAULT_HEIGHT + SPACER, maxHeight);
+		if (verbose) 	System.out.println("Legend Dim: " + totalWidth + " X " + totalHeight );		
+
 		
 		if (borderBox)
 		{
-			Object[] boxArgs = { "x", startX-HALFSPACE, "y", startY-HALFSPACE , "width", totalWidth, "height", totalHeight,  "shapeType" , "Rectangle"};
+			if (verbose) 	System.out.println("borderBox: " + totalWidth + " x " + totalHeight );		
+			Object[] boxArgs = { "x", startX-HALFSPACE, "y", 20 + startY-HALFSPACE , "width", totalWidth, "height", totalHeight,  "shapeType" , "Rectangle"};
 			Map<String,String> strs = LegendFactory.ezMap(boxArgs);
 			ShapeAnnotation lineBox = factory.createShapeAnnotation(ShapeAnnotation.class, networkView, strs);
 			lineBox.setCanvas("background");
@@ -312,7 +322,7 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 		String dispName = prop.getDisplayName();
 		GroupAnnotation legend = null;
 		String columnName = fn.getMappingColumnName();
-		Map<NodeShape, CyNode> used = ModelUtil.getUsedShapes(networkView);
+		Map<NodeShape, CyNode> used = Utility.getUsedShapes(networkView);
 		if ("Node Shape".equals(dispName))
 		{
 			List<String> objectNames = new ArrayList<String>();
@@ -320,22 +330,21 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 			Map<?,?> set = fn.getAll();
 			for (Object key : set.keySet())
 			{
-				Object val = set.get(key);
 				String s = key.toString();
-				ShapeType shape = getShapeType(val.toString());
+				Object val = set.get(key);
+				String name = val.toString();
+				ShapeType shape = getShapeType(name);
 				
 				if (shape != null && shapeIsUsed(shape, used))			// && typeIsUsed(s, types)
 				{
 					shapeList.add(shape);
 					objectNames.add(s);
-					if (verbose ) System.out.println("using shape: " + shape + " for " + s);
+					if (verbose ) System.out.println("using shape: " + shape + " for " + s + " with name " + name);
 				}
 			}
-			
+			String title = dispName + ":  " + columnName;			
 			ShapeType[] shapes = shapeList.toArray(new ShapeType[0]);
 			String[] oNames = objectNames.toArray(new String[0]);
-//			System.out.println("using shapes: " + shapes);
-//			System.out.println("with names: " + oNames);
 			legend = factory.addShapeLegend(title, x, y, outSize, shapes, oNames);
 		}
 		else if ("Node Fill Color".equals(dispName))
@@ -560,7 +569,7 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 		};
 		networkView.updateView();
 		
-		ModelUtil.dump(networkView);
+		Utility.dump(networkView);
 	}	
 
 	  private void advance(Dimension dim) {		  advance(dim.width, dim.height);		}

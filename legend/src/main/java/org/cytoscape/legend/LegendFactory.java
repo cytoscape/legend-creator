@@ -601,7 +601,7 @@ public class LegendFactory {
 		double maximum = -1000000;
 		for (ContinuousMappingPoint<?, ?> pt : list)
 		{
-			v =  ((Number)pt.getValue()).doubleValue();
+			v = (double) pt.getValue();
 			minimum = Math.min(minimum, (Double) v);
 			maximum = Math.max(maximum, (Double) v);
 		}
@@ -616,21 +616,17 @@ public class LegendFactory {
 			boolean isLast = i == list.size() - 1;
 			
 			BoundaryRangeValues<?> vals = pt.getRange();
-			v =  ((Number)pt.getValue()).doubleValue();
+			v = (double) pt.getValue();
 			if (isFirst)
 			{
 				colorList.add((Color) vals.lesserValue);
-				// Isn't this always 0?
 				stopList.add((v - minimum) / range);
+				v += .001;
 			}
-			double stop = Math.max(0,  -0.0001 + (v - minimum) / range);
-			if (stop == 0.0)
-				stop += 0.001;
 			colorList.add((Color) vals.equalValue);
-			stopList.add(stop);
+			stopList.add(Math.max(0,  -0.0001 + (v - minimum) / range));
 			if (isLast)
 			{
-				// Isn't this always 1?
 				colorList.add((Color) vals.greaterValue);
 				stopList.add((v - minimum) / range);
 			}
