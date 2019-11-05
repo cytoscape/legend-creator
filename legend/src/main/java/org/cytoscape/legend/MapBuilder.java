@@ -12,7 +12,7 @@ import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.values.LineType;
 import org.cytoscape.view.presentation.property.values.NodeShape;
 
-public class Utility {
+public class MapBuilder {
 
 	public static Map<NodeShape, CyNode> getUsedShapes(CyNetworkView networkView) {
 		Map<NodeShape, CyNode> shapeTypeMap = new HashMap<NodeShape, CyNode>();

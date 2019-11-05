@@ -39,23 +39,6 @@ import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.view.vizmap.mappings.ContinuousMapping;
 import org.cytoscape.view.vizmap.mappings.DiscreteMapping;
 
-/*
- * LegendController
- * 
- * there are two major functions:  scanNetwork() and layout()
- * 
- * scanNetwork() gets the style of the current network and
- * extracts the mapping functions.  Passthrough functions are ignored.
- * Discrete and continuous functions become check boxes in the panel.
- * 
- * A class for LegendCandidate is created in scanNetwork with 
- * a visible flag, so that if the user unchecks the box, that
- * legend is skipped
- * 
- * layout() looks at which check boxes are selected and assembles
- * one GroupAnnotation for each attribute that is checked.
- */
-
 public class LegendController implements CytoPanelComponentSelectedListener, SetCurrentNetworkListener {
 
 	private CyServiceRegistrar registrar;
@@ -251,7 +234,8 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 		{
 			if (!candidate.isVisible())   // check box not selected
 			{
-				System.out.println("hidden");continue;
+				if (verbose) System.out.println("hidden");
+				continue;
 			}
 			VisualMappingFunction<?,?> fn = candidate.getFunction();
 			String type = fn.getMappingColumnType().toString();
@@ -322,7 +306,7 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 		String dispName = prop.getDisplayName();
 		GroupAnnotation legend = null;
 		String columnName = fn.getMappingColumnName();
-		Map<NodeShape, CyNode> used = Utility.getUsedShapes(networkView);
+		Map<NodeShape, CyNode> used = MapBuilder.getUsedShapes(networkView);
 		if ("Node Shape".equals(dispName))
 		{
 			List<String> objectNames = new ArrayList<String>();
@@ -569,7 +553,7 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 		};
 		networkView.updateView();
 		
-		Utility.dump(networkView);
+		MapBuilder.dump(networkView);
 	}	
 
 	  private void advance(Dimension dim) {		  advance(dim.width, dim.height);		}
