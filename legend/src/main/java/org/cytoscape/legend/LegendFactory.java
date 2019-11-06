@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.LinearGradientPaint;
-import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.RadialGradientPaint;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
@@ -659,42 +658,11 @@ public class LegendFactory {
 		GroupAnnotation group = createGroupWithHeader( title,  x,  y,  w,  h);
 		if (group == null) return null;
 		ShapeAnnotation gradientBox = addBorderBox(group, x, y, w, h);
-		ShapeAnnotation gradientBox2 = addBorderBox(group, x, y + h + 2, w, h);
-		ShapeAnnotation gradientBox3 = addBorderBox(group, x, y + h + h + 2, w, h);
-		ShapeAnnotation gradientBox4 = addBorderBox(group, x, y + h + h + h + 2, w, h);
-
-		for (Color c : colors)
-			System.out.println(c.toString());
-		for (float f : stops)
-			System.out.println(f);
-
-		
 		
 		Point2D start = new Point2D.Float(0, 0);
 		Point2D end = new Point2D.Float(1f,0f);
 		LinearGradientPaint p = new LinearGradientPaint(start, end, stops, colors);		
-		gradientBox.setFillColor(p);
-		
-		
-		GradientPaint gp2 = new GradientPaint( 0, 0, Color.blue, w, 0, Color.yellow, false);		
-		gradientBox2.setFillColor(gp2);
-		
-		Color[] triple = { Color.green, Color.yellow, Color.cyan };
-		float[] strop2 ={ 0.0f, 0.4f, 1.0f  };
-		Point2D end3 = new Point2D.Float(1f,3f);
-		LinearGradientPaint p3 = new LinearGradientPaint(start, end3, strop2, triple);		
-        LinearGradientPaint p4=new LinearGradientPaint(0,0,0,h,new float[]{0f,1f},new Color[]{new Color(0.2498f,0.8498f,0.2498f,0.3f),new Color(0.1598f,0.78598f,0.1598f,0.8f)});
-		gradientBox3.setFillColor(p4);
-		
-		Point2D start3 = new Point2D.Float(0, 0);
-		Point2D end4 = new Point2D.Float(0, 34);
-		Color[] colors4 = {Color.blue, Color.yellow, Color.gray};
-		float dist[] = new float[3];
-		for (int i=0; i<3; i++)
-			dist[i] = ((float) i / (float) colors.length); //equally distributes colors
-		RadialGradientPaint r = new RadialGradientPaint(start3, 3f, dist, colors4);		
-		gradientBox4.setFillColor(r);
-		
+		gradientBox.setFillColor(p);		
 		addTicks(x,y,w,h,min, max, group, false);
 		return group;
 	}
