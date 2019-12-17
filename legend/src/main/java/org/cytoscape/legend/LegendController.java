@@ -125,7 +125,7 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 	private String title;
 	private String subtitle;
 	private CyNetworkView currentNetworkView;
-	private boolean verbose = true;
+	private boolean verbose = false;
 	
 	public void setLayout(boolean vert)		{ 	layoutVertically = vert;	}
 	public void setDrawBorder(boolean show)	{ 	borderBox = show;	factory.setDrawBorder(show);}
@@ -173,19 +173,26 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 //		int X = 500;			// starting point
 //		int Y = 500;
 		
+		 Map<NodeShape, CyNode> allShapes = MapBuilder.getUsedShapes(networkView);
+		 String shapeName = "Ellipse";
+		 if (!allShapes.isEmpty())
+		 {
+			 NodeShape sh = allShapes.keySet().iterator().next(); 
+			 shapeName = sh.getDisplayName();
+		 }
 		Rectangle2D.Double bounds= bounds();	
-		boolean showBounds = false;
-		if (showBounds)
-		{
-			Object[] args = { "x", bounds.getX(), "y", bounds.getY() , "width", bounds.getWidth(), "height", bounds.getHeight(),  "shapeType" , "Rectangle"};
-			Map<String,String> sstrs = LegendFactory.ezMap(args);
-			ShapeAnnotation abox = factory.createShapeAnnotation(ShapeAnnotation.class, networkView, sstrs);
-			abox.setCanvas("background");
-			abox.setName("Bounding Box");
-			abox.setBorderColor(Color.GREEN);
-			abox.setBorderWidth(3);
-			annotationMgr.addAnnotation(abox);
-		}
+//		boolean showBounds = false;
+//		if (showBounds)
+//		{
+//			Object[] args = { "x", bounds.getX(), "y", bounds.getY() , "width", bounds.getWidth(), "height", bounds.getHeight(),  "shapeType" , "Rectangle"};
+//			Map<String,String> sstrs = LegendFactory.ezMap(args);
+//			ShapeAnnotation abox = factory.createShapeAnnotation(ShapeAnnotation.class, networkView, sstrs);
+//			abox.setCanvas("background");
+//			abox.setName("Bounding Box");
+//			abox.setBorderColor(Color.GREEN);
+//			abox.setBorderWidth(3);
+//			annotationMgr.addAnnotation(abox);
+//		}
 		
 		int DEFAULT_WIDTH = 500;	 
 		int DEFAULT_HEIGHT = 100;
@@ -253,7 +260,7 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 			
 			boolean added = false;
 			if (mapType.contains("Continuous"))
-				added = factory.addContinuousMapLegend((ContinuousMapping<?, ?>) fn, x, y, size);
+				added = factory.addContinuousMapLegend((ContinuousMapping<?, ?>) fn, x, y, size, shapeName);
 			else if (mapType.contains("Discrete"))
 				added = addDiscreteMapLegend((DiscreteMapping<?, ?>) fn, x, y, size);		
 
@@ -407,6 +414,8 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 	//------------------  LegendCandidate -----------------------------------------------
 	/* 
 	 * A data structure to map functions that the user might want in a legend.
+	 * Each entry is mapping function (eg: map degree -> size) and a checkbox to determine if its included
+	 * 
 	 * It has a custom compareTo function so that Node properties will be sorted ahead of Edge properties
 	 */
 	

@@ -72,7 +72,7 @@ public class LegendFactory {
 	int RIGHT_MARGIN = 0;
 	public int getRightMargin() {		return RIGHT_MARGIN;		}
 
-	public boolean addContinuousMapLegend(ContinuousMapping<?, ?> continFn, int X, int Y, Dimension ioSize) {
+	public boolean addContinuousMapLegend(ContinuousMapping<?, ?> continFn, int X, int Y, Dimension ioSize, String shapeName) {
 		
 		int width = ioSize.width ;
 		int height = ioSize.height;
@@ -101,6 +101,8 @@ public class LegendFactory {
 			legend = addGradientLegend(title, X, Y, width, height, continFn);
 		else if (isFontSize(v))
 			legend = addFontSizeLegend(title, X, Y, ioSize, minimum, maximum, Color.LIGHT_GRAY);
+		else if ("Node Size".contentEquals(dispName))
+			legend = addNodeSizeLegend(title, X, Y, new Dimension(width, height), continFn, Color.LIGHT_GRAY, shapeName);
 		else if (isNumeric(v))
 			legend = addRampLegend(title, X, Y, width, height, continFn, Color.LIGHT_GRAY);
 		ioSize.width += RIGHT_MARGIN;
@@ -300,13 +302,13 @@ public class LegendFactory {
 			float xx = MARGIN + (orientVertically ? 0 : (i * CELL_HEIGHT));
 			float yy = MARGIN + (orientVertically ? (i * CELL_HEIGHT) + 20 : 0);
 			float siz = CELL_HEIGHT - MARGIN;
-			Object[] swatchArgs = { "x", x + xx, "y", y + yy , "width", siz, "height", siz,  "shapeType" , shapes[i].name() };
-			Map<String,String> strs = ezMap(swatchArgs);
-			ShapeAnnotation lineBox = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, strs);
-			lineBox.setFillColor(Color.lightGray);
-			lineBox.setCanvas("background");
+			Object[] shapeArgs = { "x", x + xx, "y", y + yy , "width", siz, "height", siz,  "shapeType" , shapes[i].name() };
+			Map<String,String> strs = ezMap(shapeArgs);
+			ShapeAnnotation shape = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, strs);
+			shape.setFillColor(Color.lightGray);
+			shape.setCanvas("background");
 //			annotationMgr.addAnnotation(lineBox);
-			group.addMember(lineBox);
+			group.addMember(shape);
 
 			int halfStringWidth = maxLabelWidth / 2;
 			float HALF_CELL_HEIGHT = CELL_HEIGHT / 2.0f;
@@ -323,6 +325,8 @@ public class LegendFactory {
 		}
 		return group;
 	}
+	
+	
 	
 	private Font getLabelFont() {
 		return new Font(Font.SANS_SERIF, 0, 20);
@@ -583,6 +587,82 @@ public class LegendFactory {
 		return group;
 
 	}
+
+	//------------------------------------------------------------------
+	// continuous
+	public GroupAnnotation addNodeSizeLegend(String title, int x, int y, Dimension inSize, ContinuousMapping<?, ?> continFn, Color color, String shapeType)
+	{
+		float MARGIN = 2;
+		BoundaryRangeValues<Double> range = getFunctionRange(continFn);
+		BoundaryRangeValues<Double> rangeY = getFunctionRangeY(continFn);
+		double min = range.lesserValue;
+		double max = range.greaterValue;
+		double minY = rangeY.lesserValue;
+		double maxY = rangeY.greaterValue;
+		double widthY = maxY - minY;
+		double[] nodeSize = new double[5];
+		double total = 0;
+		for (int i=0; i < 5; i++)
+		{
+			nodeSize[i] = minY + (i * widthY / 4);
+			total += nodeSize[i] + 6 * MARGIN;
+		}
+		
+		int w = inSize.width;  
+		int h = Math.max((int) nodeSize[4],inSize.height); 
+		GroupAnnotation group = createGroupWithHeader( title,  x,  y,  (int) total,  h);
+		if (group == null) return null;
+//		addBorderBox(group, x, y, (int) total, h);
+		CyNetworkView networkView = controller.getNetworkView();
+		float LINE_HEIGHT = 25;
+		float SWATCH_HEIGHT = LINE_HEIGHT + MARGIN;;
+		float CELL_HEIGHT = SWATCH_HEIGHT + MARGIN;
+		float CELL_WIDTH = 3* (SWATCH_HEIGHT + MARGIN);
+		Font labelFont = getLabelFont();		
+		int z = continFn.getPointCount();
+		double width = max - min;
+		float xx = MARGIN;
+		float yy = MARGIN;
+		for (int i=0; i < 5; i++)
+		{
+			double val = min + (i * width / 4) ;
+			String s = String.format("%5.2f", val);
+			if (continFn.getMappingColumnName().toLowerCase().contains("degree"))		// HACK degree -> integer
+			{
+				s = "" + (int) Math.round(val);
+			}
+			
+			float siz = (float) nodeSize[i];
+			float halfSize = siz /2;
+			float left = x + xx;
+			Object[] shapeArgs = { "x", left, "y", y + yy + h/2 - (siz/ 2) , "width", siz, "height", siz,  "shapeType" , shapeType };
+			Map<String,String> strs = ezMap(shapeArgs);
+			ShapeAnnotation shape = shapeFactory.createAnnotation(ShapeAnnotation.class, networkView, strs);
+			shape.setFillColor(Color.lightGray);
+			shape.setCanvas("background");
+//				annotationMgr.addAnnotation(lineBox);
+			group.addMember(shape);
+			xx += nodeSize[i] + 12;
+
+			int halfStringWidth = 60;
+			float HALF_CELL_HEIGHT = CELL_HEIGHT / 2.0f;
+			float dx = xx + CELL_WIDTH-halfStringWidth;
+			float dy = yy + CELL_HEIGHT - 30;
+			Object[] textArgs = { "x", left + halfSize - 10, "y", y + dy - HALF_CELL_HEIGHT + h/2, "width", 200, "height", CELL_HEIGHT, "text", s};
+			strs = ezMap(textArgs);
+			strs.put("fontFamily", labelFont.getFontName());
+			strs.put("fontStyle", "" + labelFont.getStyle());
+			strs.put("fontSize", "" + labelFont.getSize());
+			TextAnnotation textBox = textFactory.createAnnotation(TextAnnotation.class, networkView, strs);
+//			textBox.setCanvas("background");
+			group.addMember(textBox);
+		}
+		int FUDGE = 25;			// offset the ticks to match the text
+//		addTicks(x,y+FUDGE,w,h-(2 * FUDGE),min, max, group, true);
+		group.setCanvas("background");
+		return group;
+
+	}
 	//------------------------------------------------------------------
 	// continuous
 
@@ -591,7 +671,8 @@ public class LegendFactory {
 		Object pts = fn.getAllPoints();
 		VisualProperty<?> prop = fn.getVisualProperty();
 //		String dispName = prop.getDisplayName();
-		List<ContinuousMappingPoint<?, ?>> list = (List<ContinuousMappingPoint<?, ?>>) pts;
+		@SuppressWarnings("unchecked")
+		List<ContinuousMappingPoint<?, ?>> list = ((List<ContinuousMappingPoint<?, ?>>) pts);
 //		int listsize = list.size();
 		
 
@@ -610,6 +691,8 @@ public class LegendFactory {
 		List<Double> stopList = new ArrayList<Double>();
 		List<Color> colorList = new ArrayList<Color>();
 //		double prevVal = Double.MIN_VALUE;
+		double EPSILON = -0.0001;
+		boolean skip = false;
 		for (int i = 0; i < list.size(); i++)
 		{
 			ContinuousMappingPoint<?, ?> pt = list.get(i);
@@ -619,15 +702,15 @@ public class LegendFactory {
 			BoundaryRangeValues<?> vals = pt.getRange();
 			Object o = pt.getValue();
 			v = (double) (1.0 * (double) o);
-			if (isFirst)
+			if (isFirst && !skip)
 			{
 				colorList.add((Color) vals.lesserValue);
 				stopList.add((v - minimum) / range);
 				v += .001;
 			}
 			colorList.add((Color) vals.equalValue);
-			stopList.add(Math.max(0,  -0.0001 + (v - minimum) / range));
-			if (isLast)
+			stopList.add(Math.max(0,  (v - minimum) / range)  + EPSILON);
+			if (isLast && !skip)
 			{
 				colorList.add((Color) vals.greaterValue);
 				stopList.add((v - minimum) / range);
@@ -648,6 +731,7 @@ public class LegendFactory {
 		{
 			stops[j] = stopList.get(j).floatValue();
 			colors[j] = colorList.get(j);
+//			System.out.println(String.format("Stop: %7.5f color: %s", stops[j], colors[j] ));
 		}
 		
 		return addGradientLegend(title, x, y, w, h, minimum, maximum, colors, stops);
@@ -658,12 +742,43 @@ public class LegendFactory {
 		GroupAnnotation group = createGroupWithHeader( title,  x,  y,  w,  h);
 		if (group == null) return null;
 		ShapeAnnotation gradientBox = addBorderBox(group, x, y, w, h);
-		
 		Point2D start = new Point2D.Float(0, 0);
 		Point2D end = new Point2D.Float(1f,0f);
 		LinearGradientPaint p = new LinearGradientPaint(start, end, stops, colors);		
-		gradientBox.setFillColor(p);		
+		gradientBox.setFillColor(p);	
 		addTicks(x,y,w,h,min, max, group, false);
+		
+// testing:
+//		
+//		ShapeAnnotation gradientBox2 = addBorderBox(group, x, y + h, w, h);
+//		int size = colors.length-3;
+//		int chunkWidth = w / size;
+//		for (int i=1; i<= size; i++)
+//		{
+//			ShapeAnnotation sub = addBorderBox(group, x, y + h, chunkWidth, h);
+//			Point2D.Double pt1 = new Point2D.Double(0, 0);
+//			Point2D.Double pt2 = new Point2D.Double(1, 0);
+//			GradientPaint subpaint = new GradientPaint(pt1, colors[i], pt2, colors[i+1]);
+//			sub.setFillColor(subpaint);	
+////			System.out.println(String.format("stop: %7.3d color: %s", stops[i], colors[i] ));
+//		}
+//		ShapeAnnotation gradientBox3 = addBorderBox(group,  x, y+ h + h, w, h);
+//		
+////		for (int i=0; i< colors.length; i++)
+////			System.out.println(String.format("stop: %7.3f color: %s", stops[i], colors[i] ));
+//		start = new Point2D.Float(0, 0);
+//		end = new Point2D.Float(1f,0f);
+//		colors[0] = Color.RED;
+//		colors[1] = Color.GREEN;
+//		colors[2] = Color.WHITE;
+//		colors[3] = Color.YELLOW;
+//		colors[4] = Color.CYAN;
+//		
+//		
+//		LinearGradientPaint paint = new LinearGradientPaint(start, end, stops, colors);		
+//		gradientBox3.setFillColor(paint);	
+//
+		
 		return group;
 	}
 	
@@ -861,6 +976,7 @@ public class LegendFactory {
 
 		private boolean isNumeric(Object v) { return v instanceof Double || v instanceof Float || v instanceof Integer; }
 		private boolean isFontSize(Object v) {  		return v instanceof Font;	}
+		private boolean isNodeSize(Object v) {  		return v instanceof Double;	}
 		private boolean isStroke(Object v) { 		return v instanceof LineType;	}
 
 		public TextAnnotation createTextAnnotation(Class<TextAnnotation> type, CyNetworkView view, Map<String, String> argMap) {

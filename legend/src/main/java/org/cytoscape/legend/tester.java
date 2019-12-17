@@ -7,7 +7,7 @@ import javax.swing.*;
 
 public class tester {
 
-    public static class TwoRectangles extends JComponent {
+    public static class Gradient extends JComponent {
 
     @Override
     public void paintComponent(Graphics g) {
@@ -15,7 +15,7 @@ public class tester {
         Graphics2D g2d = (Graphics2D)g;
         g2d.setColor(Color.RED);
         
-        Rectangle r = new Rectangle(0, 75, 500, 150);
+        Rectangle r = new Rectangle(75, 75, 500, 150);
         g2d.fill(r); //paint a red opaque rectangle
 
         LinearGradientPaint p = new LinearGradientPaint(100, 100, 400, 100, new float[]{0.0f, 1.0f}, new Color[]{Color.GREEN, Color.BLUE}, MultipleGradientPaint.CycleMethod.NO_CYCLE);
@@ -24,7 +24,7 @@ public class tester {
     }
 }
 
-public static final TwoRectangles rect = new TwoRectangles();
+public static final Gradient rect = new Gradient();
 
 public static void main(String[] args) throws PrinterException {
 
@@ -33,28 +33,6 @@ public static void main(String[] args) throws PrinterException {
     f.add(rect);
     f.setSize(600, 300);
     f.setVisible(true);
-
-
-    PrinterJob printJob = PrinterJob.getPrinterJob();
-
-
-    Printable prt = new Printable() {
-
-        @Override
-        public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
-            if (pageIndex > 0)
-                return(NO_SUCH_PAGE);
-
-            rect.print(graphics);
-            return PAGE_EXISTS;
-        }
-
-    };
-
-    printJob.setPrintable(prt);
-    if (printJob.printDialog())
-          printJob.print();
-
   }
  }
 
