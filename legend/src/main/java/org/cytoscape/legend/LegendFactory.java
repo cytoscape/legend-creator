@@ -609,7 +609,7 @@ public class LegendFactory {
 		}
 		
 		int w = inSize.width;  
-		int h = Math.max((int) nodeSize[4],inSize.height); 
+		int h = Math.max((int) nodeSize[4],inSize.height) + 30; 
 		GroupAnnotation group = createGroupWithHeader( title,  x,  y,  (int) total,  h);
 		if (group == null) return null;
 //		addBorderBox(group, x, y, (int) total, h);
@@ -693,6 +693,7 @@ public class LegendFactory {
 //		double prevVal = Double.MIN_VALUE;
 		double EPSILON = -0.0001;
 		boolean skip = false;
+		double lastVal = minimum;
 		for (int i = 0; i < list.size(); i++)
 		{
 			ContinuousMappingPoint<?, ?> pt = list.get(i);
@@ -706,14 +707,23 @@ public class LegendFactory {
 			{
 				colorList.add((Color) vals.lesserValue);
 				stopList.add((v - minimum) / range);
+				lastVal = v;
 				v += .001;
 			}
-			colorList.add((Color) vals.equalValue);
-			stopList.add(Math.max(0,  (v - minimum) / range)  + EPSILON);
+			double stop = ((v - minimum) / range)  + EPSILON;
+			if (stop > lastVal)
+			{
+				colorList.add((Color) vals.equalValue);
+				stopList.add(Math.max(0,  stop));
+			}
 			if (isLast && !skip)
 			{
-				colorList.add((Color) vals.greaterValue);
-				stopList.add((v - minimum) / range);
+				lastVal = (v - minimum) / range;
+				if (lastVal > stop)
+				{
+					colorList.add((Color) vals.greaterValue);
+					stopList.add((v - minimum) / range);
+				}
 			}
 
 //			if (v instanceof Double)
