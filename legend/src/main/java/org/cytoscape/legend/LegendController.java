@@ -287,7 +287,7 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 		if (borderBox)
 		{
 			if (verbose) 	System.out.println("borderBox: " + totalWidth + " x " + totalHeight );		
-			Object[] boxArgs = { "x", startX-HALFSPACE, "y", 20 + startY-HALFSPACE , "width", totalWidth, "height", totalHeight,  "shapeType" , "Rectangle"};
+			Object[] boxArgs = { "x", startX-HALFSPACE, "y", 20 + startY-HALFSPACE , "width", totalWidth, "height", totalHeight * 1.1 ,  "shapeType" , "Rectangle"};
 			Map<String,String> strs = LegendFactory.ezMap(boxArgs);
 			ShapeAnnotation lineBox = factory.createShapeAnnotation(ShapeAnnotation.class, networkView, strs);
 			lineBox.setCanvas("background");

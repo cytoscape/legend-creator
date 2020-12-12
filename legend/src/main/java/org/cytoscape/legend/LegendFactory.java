@@ -211,7 +211,7 @@ public class LegendFactory {
 	Font labelFont = getLabelFont();  
 	int maxLabelWidth = getMaxLabelWidth(names, labelFont);
 	int labelHeight = getStringHeight(names[0], labelFont);
-	int HALF_DIF = (int)((LINE_HEIGHT - labelHeight) / 2);
+	int HALF_DIF = (int)((LINE_HEIGHT + labelHeight) / 2.5);
 	
 	float width =  3 * MARGIN + (orientVertically ? (CELL_WIDTH + maxLabelWidth) : (CELL_WIDTH * NCELLS));
 	float height = 2 * MARGIN +  (orientVertically ? (CELL_HEIGHT * NCELLS) : (MARGIN + CELL_HEIGHT));

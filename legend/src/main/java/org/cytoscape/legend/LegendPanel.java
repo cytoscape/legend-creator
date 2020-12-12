@@ -55,9 +55,9 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 	JTextField title  = new JTextField();
 	JTextField subtitle  = new JTextField();
 	
-	JButton adder = new JButton("Add Legend");
+	JButton adder = new JButton("Refresh Legend");
 	JButton selectAll = new JButton("Select All Annotations");			// DEBUG
-	JButton clearAll = new JButton("Remove Legends");
+	JButton clearAll = new JButton("Remove All Legends");
 	JButton tester = new JButton("Test");
 
 //	JLabel clickNotice = new JLabel("Click in the canvas to place the legend");
@@ -119,6 +119,7 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 			@Override public void actionPerformed(ActionEvent e) 
 			{
 //				clickNotice.setVisible(true);
+				controller.clearAnnotations();
 				controller.layout(); 
 			}
 		};
