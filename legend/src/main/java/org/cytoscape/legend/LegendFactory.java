@@ -42,7 +42,7 @@ public class LegendFactory {
 //	private CyNetworkView networkView;
 	private LegendController controller;
 	
-	boolean verbose = false;
+	boolean verbose = true;
 		
 	public LegendFactory(CyServiceRegistrar reg, LegendController ctrol)		//, CyNetworkView view
 	{
@@ -688,43 +688,26 @@ public class LegendFactory {
 			maximum = Math.max(maximum, (Double) v);
 		}
 		double range = maximum - minimum;
+    System.out.println("range = "+minimum+","+maximum);
 		List<Double> stopList = new ArrayList<Double>();
 		List<Color> colorList = new ArrayList<Color>();
 //		double prevVal = Double.MIN_VALUE;
 		double EPSILON = -0.0001;
-		boolean skip = false;
 		double lastVal = minimum;
+    System.out.println("list.size = "+list.size());
 		for (int i = 0; i < list.size(); i++)
 		{
 			ContinuousMappingPoint<?, ?> pt = list.get(i);
-			boolean isFirst = i ==0;
-			boolean isLast = i == list.size() - 1;
+			boolean isFirst = (i == 0);
+			boolean isLast = (i == list.size() - 1);
 			
 			BoundaryRangeValues<?> vals = pt.getRange();
 			Object o = pt.getValue();
 			v = (double) (1.0 * (double) o);
-			if (isFirst && !skip)
-			{
-				colorList.add((Color) vals.lesserValue);
-				stopList.add((v - minimum) / range);
-				lastVal = v;
-				v += .001;
-			}
-			double stop = ((v - minimum) / range)  + EPSILON;
-			if (stop > lastVal)
-			{
-				colorList.add((Color) vals.equalValue);
-				stopList.add(Math.max(0,  stop));
-			}
-			if (isLast && !skip)
-			{
-				lastVal = (v - minimum) / range;
-				if (lastVal > stop)
-				{
-					colorList.add((Color) vals.greaterValue);
-					stopList.add((v - minimum) / range);
-				}
-			}
+			double stop = ((v - minimum) / range);
+
+      colorList.add((Color) vals.equalValue);
+      stopList.add(Math.max(0,  stop));
 
 //			if (v instanceof Double)
 //			{
@@ -741,7 +724,8 @@ public class LegendFactory {
 		{
 			stops[j] = stopList.get(j).floatValue();
 			colors[j] = colorList.get(j);
-//			System.out.println(String.format("Stop: %7.5f color: %s", stops[j], colors[j] ));
+      if (verbose)
+  			System.out.println(String.format("Stop: %7.5f color: %s", stops[j], colors[j] ));
 		}
 		
 		return addGradientLegend(title, x, y, w, h, minimum, maximum, colors, stops);
