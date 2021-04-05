@@ -346,7 +346,7 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 			for (Object key : set.keySet())
 			{
 				String s = key.toString();
-				Object val = set.get(s);
+				Object val = set.get(key);
 				if (val instanceof Color)
 				{
 					Color c = (Color) val;

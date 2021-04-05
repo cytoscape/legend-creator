@@ -42,7 +42,7 @@ public class LegendFactory {
 //	private CyNetworkView networkView;
 	private LegendController controller;
 	
-	boolean verbose = true;
+	boolean verbose = false;
 		
 	public LegendFactory(CyServiceRegistrar reg, LegendController ctrol)		//, CyNetworkView view
 	{
@@ -688,13 +688,13 @@ public class LegendFactory {
 			maximum = Math.max(maximum, (Double) v);
 		}
 		double range = maximum - minimum;
-    System.out.println("range = "+minimum+","+maximum);
+    // System.out.println("range = "+minimum+","+maximum);
 		List<Double> stopList = new ArrayList<Double>();
 		List<Color> colorList = new ArrayList<Color>();
 //		double prevVal = Double.MIN_VALUE;
 		double EPSILON = -0.0001;
 		double lastVal = minimum;
-    System.out.println("list.size = "+list.size());
+    // System.out.println("list.size = "+list.size());
 		for (int i = 0; i < list.size(); i++)
 		{
 			ContinuousMappingPoint<?, ?> pt = list.get(i);
