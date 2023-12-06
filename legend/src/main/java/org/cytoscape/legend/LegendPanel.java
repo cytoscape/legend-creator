@@ -188,11 +188,11 @@ public class LegendPanel extends JPanel implements CytoPanelComponent {
 	public void setCurrentNetwork()
 	{
 		CyNetworkView view = controller.getNetworkView();
-		curNetNameLabel.setText(view == null ? "no current network" : "" + view.getModel());
-		title.setText(view == null ? "" : "" + view.getModel());
+		curNetNameLabel.setText("Legend");
+		title.setText("Legend");
 		if (subtitle.getText().isEmpty())
-			subtitle.setText("Legend");
-		title.setText(view == null ? "" : "" + view.getModel());
+			subtitle.setText("");
+		title.setText("Legend");
 		enableControls(view != null);
 	}
 	//--------------------------------------------------------------------

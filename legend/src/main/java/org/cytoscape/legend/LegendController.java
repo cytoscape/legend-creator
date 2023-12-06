@@ -198,7 +198,7 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 		int DEFAULT_HEIGHT = 100;
 		int SPACER = 150;
 		int HALFSPACE = SPACER / 2;
-		int LINE_HEIGHT = 30;
+		int LINE_HEIGHT = 50;
 
 		final int left = (int) bounds.getX() ;
 		final int top = (int) bounds.getY();
@@ -213,7 +213,7 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 		
 		if (title.length() > 0)
 		{
-			Object[] textArgs = { "x", x , "y", y, "width", DEFAULT_WIDTH, "height", LINE_HEIGHT, "text", title,  "fontSize", 24, "fontFamily", "Serif" };
+			Object[] textArgs = { "x", x , "y", y, "width", DEFAULT_WIDTH, "height", LINE_HEIGHT, "text", title,  "fontSize", 48, "fontFamily", "Serif" };
 			Map<String,String> strs = LegendFactory.ezMap(textArgs);
 			TextAnnotation textBox = factory.createTextAnnotation(TextAnnotation.class, networkView, strs);
 			textBox.setCanvas("background");
@@ -224,7 +224,7 @@ public class LegendController implements CytoPanelComponentSelectedListener, Set
 		}
 		if (subtitle.length() > 0)
 		{
-			Object[] textArgs = { "x", x , "y", y, "width", DEFAULT_WIDTH, "height", LINE_HEIGHT, "text", subtitle,  "fontSize", 14, "fontFamily", "SansSerif" };
+			Object[] textArgs = { "x", x , "y", y, "width", DEFAULT_WIDTH, "height", LINE_HEIGHT, "text", subtitle,  "fontSize", 24, "fontFamily", "SansSerif" };
 			Map<String,String> strs = LegendFactory.ezMap(textArgs);
 			TextAnnotation textBox = factory.createTextAnnotation(TextAnnotation.class, networkView, strs);
 			textBox.setCanvas("background");
